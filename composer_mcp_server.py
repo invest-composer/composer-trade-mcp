@@ -1,10 +1,11 @@
 """
 Main entry point for the composer-mcp-server application.
 """
-from typing import List, Dict
+from typing import List, Dict, Any
 from src.schemas.symphony_score_schema import SymphonyScore, validate_symphony_score
 from src.schemas.asset_classes_schema import AssetClasses
 from src.schemas.api import AccountResponse, AccountHoldingResponse
+from src.schemas.backtest_api import DvmCapital, Legend, BacktestResponse
 from fastmcp import FastMCP
 import httpx
 import os
@@ -43,25 +44,95 @@ def parse_stats(stats: Dict) -> Dict:
         parsed_stats["pearson_r"] = round(percent_stats.get("pearson_r", 0), 4)
     return parsed_stats
 
-def parse_backtest_output(output: Dict) -> Dict:
+def epoch_to_date(epoch: int) -> str:
+    """
+    Convert an epoch timestamp to a date string.
+    """
+    return datetime.utcfromtimestamp(epoch * 86400).strftime("%Y-%m-%d")
+
+def parse_dvm_capital(dvm_capital: DvmCapital, legend: Legend) -> Dict[str, List[Any]]:
+    """
+    Parse the daily values of a symphony backtest.
+    Returns a list of dictionaries where each dictionary represents a daily value row
+    with cumulative returns since the first day (all series start at 0%).
+    Example output:
+    {"cumulative_return_date": ["2024-01-01", "2024-01-02", ...],
+     "Big Tech momentum": [0, 1, ...],
+     "SPY": [0, -1, ...]}
+    """
+    parsed_daily_values = {}
+
+    # Collect all unique dates first
+    all_dates = set()
+    for values in dvm_capital.values():
+        for day_num in values.keys():
+            # Use UTC timestamp to match Java LocalDate.ofEpochDay behavior
+            date_str = epoch_to_date(int(day_num))
+            all_dates.add(date_str)
+
+    # Sort dates
+    sorted_dates = sorted(all_dates)
+
+    # Create list of dictionaries for dataframe-friendly structure
+    parsed_daily_values = {"cumulative_return_date": sorted_dates}
+    first_day_values = {}
+
+    for date in sorted_dates:
+
+        for key, values in dvm_capital.items():
+            # Replace key with legend name if it exists
+            legend_entry = legend.get(key)
+            display_key = legend_entry.name if legend_entry else key
+            if display_key not in parsed_daily_values:
+                parsed_daily_values[display_key] = []
+
+            # Find the corresponding value for this date
+            value = None
+            for day_num, val in values.items():
+                date_str = epoch_to_date(int(day_num))
+                if date_str == date:
+                    value = val
+                    break
+
+            # Calculate cumulative return since first day
+            if value is not None and display_key not in first_day_values:
+                # Set the first value as the base for cumulative returns
+                first_day_values[display_key] = value
+            if value is not None and display_key in first_day_values:
+                # Calculate cumulative return since first day
+                first_day_value = first_day_values[display_key]
+                cumulative_return = ((value - first_day_value) / first_day_value) * 100
+                parsed_daily_values[display_key].append(round(cumulative_return, 2))
+            else:
+                parsed_daily_values[display_key].append(None)
+
+    return parsed_daily_values
+
+def parse_backtest_output(backtest: BacktestResponse, include_daily_values: bool = False) -> Dict:
     """
     Parse the output of a symphony backtest.
     """
-    return {
-        "data_warnings": output.get("data_warnings"),
-        "first_day": datetime.fromtimestamp(output.get("first_day") * 86400).strftime("%Y-%m-%d") if output.get("first_day") else None,
-        "first_day_value": f"${output.get('capital', 0):,.2f}",
-        "last_market_day": datetime.fromtimestamp(output.get("last_market_day") * 86400).strftime("%Y-%m-%d") if output.get("last_market_day") else None,
+    output = {
+        "data_warnings": backtest.data_warnings,
+        "first_day": epoch_to_date(backtest.first_day) if backtest.first_day else None,
+        "first_day_value": f"${backtest.capital:,.2f}" if backtest.capital else None,
+        "last_market_day": epoch_to_date(backtest.last_market_day) if backtest.last_market_day else None,
         "last_market_days_shares": {
-            k: v for k, v in output.get("last_market_days_holdings", {}).items()
+            k: v for k, v in (backtest.last_market_days_holdings or {}).items()
             if k != "$USD" and v != 0.0
         },
-        "last_market_days_value": f"${output.get('last_market_days_value', 0):,.2f}" if output.get('last_market_days_value') else None,
-        "stats": parse_stats(output.get("stats", {}))
+        "last_market_days_value": f"${backtest.last_market_days_value:,.2f}" if backtest.last_market_days_value else None,
+        "stats": parse_stats(backtest.stats or {}),
     }
+    if include_daily_values and backtest.dvm_capital and backtest.legend:
+        output["daily_values"] = parse_dvm_capital(backtest.dvm_capital, backtest.legend)
+    return output
 
 @mcp.tool
 def backtest_symphony_by_id(symphony_id: str,
+                            start_date: str = None,
+                            end_date: str = None,
+                            include_daily_values: bool = True,
                             apply_reg_fee: bool = True,
                             apply_taf_fee: bool = True,
                             broker: str = "ALPACA_WHITE_LABEL",
@@ -71,35 +142,51 @@ def backtest_symphony_by_id(symphony_id: str,
                             benchmark_tickers: List[str] = ["SPY"]) -> Dict:
     """
     Backtest a symphony given its ID.
+    Use `include_daily_values=False` to reduce the response size (default is True).
+    Daily values are cumulative returns since the first day of the backtest (i.e., 19 means 19% cumulative return since the first day).
+    If start_date is not provided, the backtest will start from the earliest backtestable date.
+    You should default to backtesting from the first day of the year in order to reduce the response size.
+    If end_date is not provided, the backtest will end on the last day with data.
+
+    After calling this tool, visualize the results. daily_values can be easily loaded into a pandas dataframe for plotting.
     """
     url = f"{BASE_URL}/api/v0.1/symphonies/{symphony_id}/backtest"
+    params = {
+        "apply_reg_fee": apply_reg_fee,
+        "apply_taf_fee": apply_taf_fee,
+        "broker": broker,
+        "capital": capital,
+        "slippage_percent": slippage_percent,
+        "spread_markup": spread_markup,
+        "benchmark_tickers": benchmark_tickers,
+    }
+    if start_date:
+        params["start_date"] = start_date
+    if end_date:
+        params["end_date"] = end_date
     response = httpx.post(
         url,
         headers={
             "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
             "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
         },
-        json={
-            "apply_reg_fee": apply_reg_fee,
-            "apply_taf_fee": apply_taf_fee,
-            "broker": broker,
-            "capital": capital,
-            "slippage_percent": slippage_percent,
-            "spread_markup": spread_markup,
-            "benchmark_tickers": benchmark_tickers,
-        }
+        json=params
     )
     output = response.json()
     try:
         if output.get("stats"):
-            return parse_backtest_output(output)
+            return parse_backtest_output(BacktestResponse(**output), include_daily_values)
         else:
             return output
     except Exception as e:
-        return response.text
+        return {"error": str(e)} # temporary
+        # return response.text
 
 @mcp.tool
 def backtest_symphony(symphony_score: SymphonyScore,
+                            start_date: str = None,
+                            end_date: str = None,
+                            include_daily_values: bool = True,
                             apply_reg_fee: bool = True,
                             apply_taf_fee: bool = True,
                             broker: str = "ALPACA_WHITE_LABEL",
@@ -109,34 +196,47 @@ def backtest_symphony(symphony_score: SymphonyScore,
                             benchmark_tickers: List[str] = ["SPY"]) -> Dict:
     """
     Backtest a symphony that was created with `create_symphony`.
+    Use `include_daily_values=False` to reduce the response size (default is True).
+    Daily values are cumulative returns since the first day of the backtest (i.e., 19 means 19% cumulative return since the first day).
+    If start_date is not provided, the backtest will start from the earliest backtestable date.
+    You should default to backtesting from the first day of the year in order to reduce the response size.
+    If end_date is not provided, the backtest will end on the last day with data.
+
+    After calling this tool, visualize the results. daily_values can be easily loaded into a pandas dataframe for plotting.
     """
     url = f"{BASE_URL}/api/v0.1/backtest"
     validated_score= validate_symphony_score(symphony_score)
+    params = {
+        "symphony": {"raw_value": validated_score.model_dump()},
+        "apply_reg_fee": apply_reg_fee,
+        "apply_taf_fee": apply_taf_fee,
+        "broker": broker,
+        "capital": capital,
+        "slippage_percent": slippage_percent,
+        "spread_markup": spread_markup,
+        "benchmark_tickers": benchmark_tickers,
+    }
+    if start_date:
+        params["start_date"] = start_date
+    if end_date:
+        params["end_date"] = end_date
     response = httpx.post(
         url,
         headers={
             "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
             "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
         },
-        json={
-            "symphony": {"raw_value": validated_score.model_dump()},
-            "apply_reg_fee": apply_reg_fee,
-            "apply_taf_fee": apply_taf_fee,
-            "broker": broker,
-            "capital": capital,
-            "slippage_percent": slippage_percent,
-            "spread_markup": spread_markup,
-            "benchmark_tickers": benchmark_tickers,
-        }
+        json=params
     )
     try:
         output = response.json()
         if output.get("stats"):
-            return parse_backtest_output(output)
+            return parse_backtest_output(BacktestResponse(**output), include_daily_values)
         else:
             return output
     except Exception as e:
-        return response.text
+        return {"error": str(e)} # temporary
+        # return response.text
 
 @mcp.tool
 def create_symphony(symphony_score: SymphonyScore) -> SymphonyScore:

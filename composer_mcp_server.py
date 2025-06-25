@@ -3,7 +3,6 @@ Main entry point for the composer-mcp-server application.
 """
 from typing import List, Dict, Any
 from src.schemas.symphony_score_schema import SymphonyScore, validate_symphony_score
-from src.schemas.asset_classes_schema import AssetClasses
 from src.schemas.api import AccountResponse, AccountHoldingResponse
 from src.schemas.backtest_api import DvmCapital, Legend, BacktestResponse
 from fastmcp import FastMCP

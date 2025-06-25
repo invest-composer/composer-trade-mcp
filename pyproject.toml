@@ -1,6 +1,6 @@
 [project]
 name = "composer-mcp-server"
-version = "0.1.0"
+version = "0.1.5"
 description = "Composer MCP Server - Backtest and Automate your trades with LLMs"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -45,6 +45,10 @@ dependencies = [
     "httpx>=0.28.1",
     "pydantic>=2.11.7",
 ]
+
+[project.scripts]
+composer-mcp-server = "composer_mcp_server.server:main"
+
 [project.urls]
 Homepage = "https://github.com/invest-composer/composer-mcp-server"
 Repository = "https://github.com/invest-composer/composer-mcp-server.git"

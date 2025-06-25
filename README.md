@@ -20,7 +20,7 @@
 - **Backtest your ideas**
   - Our Backtesting API provides a fast feedback loop for AI to iterate and validate its hypotheses.
   - _Try asking Claude_: "Compare the strategy's performance against the S&P 500. Plot the results."
-- **Monitor performance** (requires [API Key](https://github.com/invest-composer/composer-mcp-server/README.md#getting-your-api-key))
+- **Monitor performance** (requires [API Key](https://github.com/invest-composer/composer-mcp-server?tab=readme-ov-file#getting-your-api-key))
   - View performance statistics for your overall account as well as for individual symphonies.
   - _Try asking Claude_: "Identify my best-performing symphonies. Analyze why they are working."
 - **Control your investments** (requires API Key + [Composer subscription](https://www.composer.trade/pricing))

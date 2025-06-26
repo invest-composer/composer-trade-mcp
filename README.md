@@ -47,6 +47,7 @@
   }
 }
 ```
+3. If this doesn't work, check the "[Spawn uvx ENOENT](https://github.com/invest-composer/composer-mcp-server?tab=readme-ov-file#mcp-composer-spawn-uvx-enoent)" section below.
 
 If you're using Windows, you will have to enable "Developer Mode" in Claude Desktop to use the MCP server. Click "Help" in the hamburger menu at the top left and select "Enable Developer Mode".
 

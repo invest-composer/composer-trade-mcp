@@ -1,13 +1,15 @@
 """
 Main MCP server implementation for Composer.
 """
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Literal
 import httpx
 import os
 
+from pydantic import Field
+
 from fastmcp import FastMCP
-from .schemas import SymphonyScore, validate_symphony_score, AccountResponse, AccountHoldingResponse, DvmCapital, Legend, BacktestResponse
-from .utils import parse_backtest_output
+from .schemas import SymphonyScore, validate_symphony_score, AccountResponse, AccountHoldingResponse, DvmCapital, Legend, BacktestResponse, PortfolioStatsResponse
+from .utils import parse_backtest_output, truncate_text, epoch_ms_to_date
 
 BASE_URL = "https://public-api-gateway-599937284915.us-central1.run.app"
 # BASE_URL = "https://api.composer.trade"
@@ -66,8 +68,7 @@ def backtest_symphony_by_id(symphony_id: str,
         else:
             return output
     except Exception as e:
-        return {"error": str(e)} # temporary
-        # return response.text
+        return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
 
 @mcp.tool
 def backtest_symphony(symphony_score: SymphonyScore,
@@ -122,8 +123,7 @@ def backtest_symphony(symphony_score: SymphonyScore,
         else:
             return output
     except Exception as e:
-        return {"error": str(e)} # temporary
-        # return response.text
+        return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
 
 @mcp.tool
 def create_symphony(symphony_score: SymphonyScore) -> SymphonyScore:
@@ -150,6 +150,7 @@ def list_accounts() -> List[AccountResponse]:
     List all brokerage accounts available to the Composer user.
     Account-related tools need to be called with the account_uuid of the account you want to use.
     This tool returns a list of accounts and their UUIDs.
+    If this returns an empty list, the user needs to complete their Composer onboarding on app.composer.trade.
     """
     url = f"{BASE_URL}/api/v0.1/accounts/list"
     response = httpx.get(
@@ -176,6 +177,188 @@ def get_account_holdings(account_uuid: str) -> List[AccountHoldingResponse]:
     )
     return response.json()
 
+@mcp.tool
+def get_aggregate_portfolio_stats(account_uuid: str) -> PortfolioStatsResponse:
+    """
+    Get the aggregate portfolio statistics of a brokerage account.
+
+    This is useful because each brokerage account in Composer can invest in multiple symphonies, each with their own stats.
+    Output is a JSON object with the following fields:
+    - portfolio_value: float. The total value of the portfolio (stocks + cash).
+    - total_cash: float. The total cash in the account.
+    - pending_deploys_cash: float. The cash that is pending investment into a symphony (investments don't occur until the trading period near market close)
+    - total_unallocated_cash: float. The amount of cash that is not held in a symphony. This is the cash that is available for investment.
+    - net_deposits: float. The sum of deposits into the account. Used to calculate naive cumulative return.
+    - simple_return: float. The naive cumulative return of the portfolio. Equivalent to (portfolio_value - net_deposits) / net_deposits.
+    - todays_dollar_change: float. The dollar difference between the portfolio value today and yesterday. IMPORTANT: This will include the effect of depositing/withdrawing funds. EX: If you had $1000 yesterday and deposited $100 today, todays_dollar_change will be $100, holding the share value constant.
+    - todays_percent_change: float. The percent change of the portfolio today. Calculated as todays_dollar_change / portfolio_value.
+    """
+    url = f"{BASE_URL}/api/v0.1/portfolio/accounts/{account_uuid}/total-stats"
+    response = httpx.get(
+        url,
+        headers={
+            "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
+            "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
+        }
+    )
+    data = response.json()
+    if 'time_weighted_return' in data:
+        del data['time_weighted_return']
+    return data
+
+@mcp.tool
+def get_aggregate_symphony_stats(account_uuid: str) -> Dict:
+    """
+    Get stats for every symphony in a brokerage account.
+    Contains aggregate stats such as the naive cumulative return ("simple_return"), time-weighted return, sharpe ratio, current holdings, etc.
+
+    "deposit_adjusted_value" refers to the time-weighted value of the symphony.
+    """
+    url = f"{BASE_URL}/api/v0.1/portfolio/accounts/{account_uuid}/symphony-stats-meta"
+    response = httpx.get(
+        url,
+        headers={
+            "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
+            "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
+        }
+    )
+    return response.json()
+
+@mcp.tool
+def get_symphony_daily_performance(account_uuid: str, symphony_id: str) -> Dict:
+    """
+    Get daily performance for a specific symphony in a brokerage account.
+    Outputs a JSON object with the following fields:
+    - dates: List[str]. The dates for which performance is available.
+    - series: List[float]. The total value of the symphony on the given date.
+    - deposit_adjusted_series: List[float]. The value of the symphony on the given date, adjusted for deposits and withdrawals. (AKA daily time-weighted value)
+    """
+    url = f"{BASE_URL}/api/v0.1/portfolio/accounts/{account_uuid}/symphonies/{symphony_id}"
+    response = httpx.get(
+        url,
+        headers={
+            "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
+            "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
+        }
+    )
+    data = response.json()
+    data['dates'] = [epoch_ms_to_date(d) for d in data['epoch_ms']]
+    del data['epoch_ms']
+    return data
+
+@mcp.tool
+def get_portfolio_daily_performance(account_uuid: str) -> Dict:
+    """
+    Get the daily performance for a brokerage account.
+    Returns the value of the account portfolio over time.
+    Outputs a JSON object with the following fields:
+    - dates: List[str]. The dates for which performance is available.
+    - series: List[float]. The total value of the portfolio on the given date.
+    """
+    url = f"{BASE_URL}/api/v0.1/portfolio/accounts/{account_uuid}/portfolio-history"
+    response = httpx.get(
+        url,
+        headers={
+            "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
+            "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
+        }
+    )
+    data = response.json()
+    data['dates'] = [epoch_ms_to_date(d) for d in data['epoch_ms']]
+    del data['epoch_ms']
+    return data
+
+# FIXME: This tool is not working.
+# Error message is:  "Expecting value: line 1 column 2 (char 1)" which is pretty vague.
+@mcp.tool
+def save_symphony(
+    symphony_score: SymphonyScore,
+    color: Literal["#AEC3C6", "#E3BC99", "#49D1E3", "#829DFF", "#FF6B6B", "#39D088", "#FC5100", "#FFBB38", "#FFB4ED", "#17BAFF", "#BA84FF"] ,
+    hashtag: str = Field(description="Memorable hashtag for the symphony. Think of it like the ticker symbol of the symphony. (EX: '#BTD' for a symphony called 'Buy the Dip')"),
+    asset_class: Literal["EQUITIES", "CRYPTO"] = "EQUITIES"
+) -> Dict:
+    """
+    Save a symphony to the user's account. If successful, returns the symphony ID.
+    """
+    validated_score= validate_symphony_score(symphony_score)
+    symphony = validated_score.model_dump()
+
+    url = f"{BASE_URL}/api/v0.1/symphonies/"
+    payload = {
+        "name": symphony['name'],
+        "asset_class": asset_class,
+        "description": symphony['description'],
+        "color": color,
+        "hashtag": hashtag,
+        "symphony": {"raw_value": symphony}
+    }
+    try:
+        response = httpx.post(
+            url,
+            headers={
+                "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
+                "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
+            },
+            json=payload
+        )
+        return response.json()
+    except Exception as e:
+        payload_without_symphony = {k: v for k, v in payload.items() if k != "symphony"}
+        return {"error": truncate_text(str(e), 1000), "payload": payload_without_symphony}
+
+@mcp.tool
+def update_saved_symphony(
+    symphony_id: str,
+    symphony_score: SymphonyScore,
+    color: Literal["#AEC3C6", "#E3BC99", "#49D1E3", "#829DFF", "#FF6B6B", "#39D088", "#FC5100", "#FFBB38", "#FFB4ED", "#17BAFF", "#BA84FF"],
+    hashtag: str = Field(description="Memorable hashtag for the symphony. Think of it like the ticker symbol of the symphony. (EX: '#BTD' for a symphony called 'Buy the Dip')"),
+    asset_class: Literal["EQUITIES", "CRYPTO"] = "EQUITIES"
+) -> Dict:
+    """
+    Update an existing symphony in the user's account. If successful, returns the updated symphony details.
+    """
+    validated_score = validate_symphony_score(symphony_score)
+    symphony = validated_score.model_dump()
+
+    url = f"{BASE_URL}/api/v0.1/symphonies/{symphony_id}"
+    payload = {
+        "name": symphony['name'],
+        "asset_class": asset_class,
+        "description": symphony['description'],
+        "color": color,
+        "hashtag": hashtag,
+        "symphony": {"raw_value": symphony}
+    }
+    try:
+        response = httpx.put(
+            url,
+            headers={
+                "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
+                "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
+            },
+            json=payload
+        )
+        return response.json()
+    except Exception as e:
+        payload_without_symphony = {k: v for k, v in payload.items() if k != "symphony"}
+        return {"error": truncate_text(str(e), 1000), "payload": payload_without_symphony}
+
+@mcp.tool
+def get_saved_symphony(symphony_id: str) -> SymphonyScore:
+    """
+    Get a saved symphony.
+    Useful when you are given a URL like "https://app.composer.trade/symphony/{<symphony_id>}/details"
+    """
+    url = f"{BASE_URL}/api/v0.1/symphonies/{symphony_id}/score"
+    response = httpx.get(
+        url,
+        headers={
+            "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
+            "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
+        }
+    )
+    return response.json()
+
 def main():
     """Main entry point for the composer-mcp-server."""
-    mcp.run() 
+    mcp.run()

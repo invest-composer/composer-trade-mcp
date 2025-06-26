@@ -42,3 +42,13 @@ class AccountResponse(BaseModel):
                 "has_active_position": False
             }
         }
+
+class PortfolioStatsResponse(BaseModel):
+    portfolio_value: float
+    total_cash: float
+    pending_deploys_cash: float
+    total_unallocated_cash: float
+    net_deposits: float
+    simple_return: float
+    todays_percent_change: float
+    todays_dollar_change: float

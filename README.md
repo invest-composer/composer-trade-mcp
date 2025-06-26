@@ -16,16 +16,16 @@
 - **Create automated investing strategies**
   - Use indicators like Relative Strength Index (RSI), Moving Average (MA), and Exponential Moving Average (EMA) with a diverse range of equity and crypto offerings to build your ideal portfolio.
   - Don't just make one-off trades. Composer symphonies constantly monitor the market and rebalance accordingly.
-  - _Try asking Claude_: "Build me a crypto strategy with a maximum drawdown of 30% or less."
+  - Try asking Claude: "_Build me a crypto strategy with a maximum drawdown of 30% or less._"
 - **Backtest your ideas**
   - Our Backtesting API provides a fast feedback loop for AI to iterate and validate its hypotheses.
-  - _Try asking Claude_: "Compare the strategy's performance against the S&P 500. Plot the results."
+  - Try asking Claude: "_Compare the strategy's performance against the S&P 500. Plot the results._"
 - **Monitor performance** (requires [API Key](https://github.com/invest-composer/composer-mcp-server?tab=readme-ov-file#getting-your-api-key))
   - View performance statistics for your overall account as well as for individual symphonies.
-  - _Try asking Claude_: "Identify my best-performing symphonies. Analyze why they are working."
+  - Try asking Claude: "_Identify my best-performing symphonies. Analyze why they are working._"
 - **Control your investments** (requires API Key + [Composer subscription](https://www.composer.trade/pricing))
   - Ask AI to analyze your investments and adjust your exposure accordingly!
-  - _Try asking Claude_: "Research the latest trends and news. Analyze my symphonies and determine whether I should increase / decrease my investments."
+  - Try asking Claude: "_Research the latest trends and news. Analyze my symphonies and determine whether I should increase / decrease my investments._"
 
 ## Quickstart with Claude Desktop
 1. Install `uv` (Python package manager) with `curl -LsSf https://astral.sh/uv/install.sh | sh` or see the `uv` [repo](https://github.com/astral-sh/uv) for additional install methods.
@@ -36,7 +36,13 @@
   "mcpServers": {
     "composer": {
       "command": "uvx",
-      "args": ["composer-mcp-server"]
+      "args": [
+        "--refresh",
+        "--default-index", "https://test.pypi.org/simple/",
+        "--index", "https://pypi.org/simple/",
+        "--index-strategy", "unsafe-best-match",
+        "composer-mcp-server@latest"
+      ],
     }
   }
 }
@@ -76,7 +82,13 @@ Get your API key from [Composer](https://app.composer.trade) by following these 
   "mcpServers": {
     "composer": {
       "command": "uvx",
-      "args": ["composer-mcp-server"],
+      "args": [
+        "--refresh",
+        "--default-index", "https://test.pypi.org/simple/",
+        "--index", "https://pypi.org/simple/",
+        "--index-strategy", "unsafe-best-match",
+        "composer-mcp-server@latest"
+      ],
       "env": {
         "COMPOSER_API_KEY": "<insert-your-api-key-here>"
         "COMPOSER_SECRET_KEY": "<insert-your-api-secret-here>"

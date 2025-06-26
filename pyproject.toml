@@ -1,12 +1,60 @@
 [project]
 name = "composer-mcp-server"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.1.5"
+description = "Composer MCP Server - Backtest and Automate your trades with LLMs"
 readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    { name = "Composer Technologies Inc.", email = "help@composer.trade" }
+]
+keywords = [
+    "composer",
+    "ai-trading",
+    "ai-stock-trader",
+    "ai-crypto-trader",
+    "algorithmic-trading",
+    "backtesting",
+    "quantitative-trading",
+    "automated-trading",
+    "trading-strategies",
+    "portfolio-management",
+    "investment-automation",
+    "symphony-trading",
+    "no-code-trading",
+    "trading-execution",
+    "risk-management",
+    "financial-technology",
+    "fintech",
+    "mcp",
+    "llm"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
 dependencies = [
     "asyncio>=3.4.3",
     "fastmcp>=2.8.1",
     "httpx>=0.28.1",
     "pydantic>=2.11.7",
 ]
+
+[project.scripts]
+composer-mcp-server = "composer_mcp_server.server:main"
+
+[project.urls]
+Homepage = "https://github.com/invest-composer/composer-mcp-server"
+Repository = "https://github.com/invest-composer/composer-mcp-server.git"
+Documentation = "https://github.com/invest-composer/composer-mcp-server#readme"
+Issues = "https://github.com/invest-composer/composer-mcp-server/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

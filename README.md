@@ -42,7 +42,7 @@
         "--index", "https://pypi.org/simple/",
         "--index-strategy", "unsafe-best-match",
         "composer-mcp-server@latest"
-      ],
+      ]
     }
   }
 }

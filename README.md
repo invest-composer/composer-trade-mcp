@@ -48,6 +48,7 @@
 }
 ```
 3. If this doesn't work, check the "[Spawn uvx ENOENT](https://github.com/invest-composer/composer-mcp-server?tab=readme-ov-file#mcp-composer-spawn-uvx-enoent)" section below.
+4. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Create and backtest a basic 60-40 strategy._"
 
 If you're using Windows, you will have to enable "Developer Mode" in Claude Desktop to use the MCP server. Click "Help" in the hamburger menu at the top left and select "Enable Developer Mode".
 
@@ -55,8 +56,6 @@ If you're using Windows, you will have to enable "Developer Mode" in Claude Desk
 
 For other clients like Cursor, run:
 TODO
-
-That's it. Your MCP client can now interact with Composer!
 
 ## Getting your API Key
 

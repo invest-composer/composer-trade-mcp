@@ -90,7 +90,7 @@ Get your API key from [Composer](https://app.composer.trade) by following these 
         "composer-mcp-server@latest"
       ],
       "env": {
-        "COMPOSER_API_KEY": "<insert-your-api-key-here>"
+        "COMPOSER_API_KEY": "<insert-your-api-key-here>",
         "COMPOSER_SECRET_KEY": "<insert-your-api-secret-here>"
       }
     }

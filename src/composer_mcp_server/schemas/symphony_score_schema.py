@@ -8,6 +8,8 @@ from pydantic.json_schema import JsonSchemaValue
 from enum import Enum
 import uuid
 
+from ..utils import truncate_text
+
 CRYPTO_ASSETS = ['SOL', 'BCH', 'ETH', 'BTC', 'XRP', 'LTC', 'BAT', 'MKR', 'DOGE', 'XTZ', 'USDC', 'LINK', 'DOT', 'CRV', 'SUSHI', 'UNI', 'YFI', 'AAVE', 'GRT', 'USDT', 'AVAX', 'SHIB']
 
 class Function(str, Enum):
@@ -268,4 +270,4 @@ def validate_symphony_score(symphony_score: SymphonyScore) -> SymphonyScore:
                     raise ValueError(f'Unsupported crypto asset: {node.ticker}. Only the following crypto assets are supported: {", ".join(CRYPTO_ASSETS)}')
         return validated_score
     except ValidationError as e:
-        raise ValueError(f"Invalid symphony score: {e}")
+        raise ValueError(f"Invalid symphony score: {truncate_text(str(e), 1000)}")

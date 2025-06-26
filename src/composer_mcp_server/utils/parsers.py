@@ -38,6 +38,12 @@ def epoch_to_date(epoch: int) -> str:
     """
     return datetime.utcfromtimestamp(epoch * 86400).strftime("%Y-%m-%d")
 
+def epoch_ms_to_date(epoch_ms: int) -> str:
+    """
+    Convert an epoch timestamp to a date string.
+    """
+    return datetime.utcfromtimestamp(epoch_ms / 1000).strftime("%Y-%m-%d")
+
 def parse_dvm_capital(dvm_capital: DvmCapital, legend: Legend) -> Dict[str, List[Any]]:
     """
     Parse the daily values of a symphony backtest.

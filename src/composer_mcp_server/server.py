@@ -9,7 +9,7 @@ from pydantic import Field
 
 from fastmcp import FastMCP
 from .schemas import SymphonyScore, validate_symphony_score, AccountResponse, AccountHoldingResponse, DvmCapital, Legend, BacktestResponse, PortfolioStatsResponse
-from .utils import parse_backtest_output, truncate_text, epoch_ms_to_date
+from .utils import parse_backtest_output, truncate_text, epoch_ms_to_date, get_optional_headers, get_required_headers
 
 BASE_URL = "https://public-api-gateway-599937284915.us-central1.run.app"
 # BASE_URL = "https://api.composer.trade"
@@ -55,13 +55,11 @@ def backtest_symphony_by_id(symphony_id: str,
         params["end_date"] = end_date
     response = httpx.post(
         url,
-        headers={
-            "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
-            "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
-        },
+        headers=get_optional_headers(),
         json=params
     )
     output = response.json()
+    output["capital"] = capital
     try:
         if output.get("stats"):
             return parse_backtest_output(BacktestResponse(**output), include_daily_values)
@@ -110,14 +108,12 @@ def backtest_symphony(symphony_score: SymphonyScore,
         params["end_date"] = end_date
     response = httpx.post(
         url,
-        headers={
-            "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
-            "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
-        },
+        headers=get_optional_headers(),
         json=params
     )
     try:
         output = response.json()
+        output["capital"] = capital
         if output.get("stats"):
             return parse_backtest_output(BacktestResponse(**output), include_daily_values)
         else:
@@ -155,10 +151,7 @@ def list_accounts() -> List[AccountResponse]:
     url = f"{BASE_URL}/api/v0.1/accounts/list"
     response = httpx.get(
         url,
-        headers={
-            "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
-            "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
-        }
+        headers=get_required_headers(),
     )
     return response.json()["accounts"]
 
@@ -170,10 +163,7 @@ def get_account_holdings(account_uuid: str) -> List[AccountHoldingResponse]:
     url = f"{BASE_URL}/api/v0.1/accounts/{account_uuid}/holdings"
     response = httpx.get(
         url,
-        headers={
-            "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
-            "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
-        }
+        headers=get_required_headers(),
     )
     return response.json()
 
@@ -196,10 +186,7 @@ def get_aggregate_portfolio_stats(account_uuid: str) -> PortfolioStatsResponse:
     url = f"{BASE_URL}/api/v0.1/portfolio/accounts/{account_uuid}/total-stats"
     response = httpx.get(
         url,
-        headers={
-            "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
-            "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
-        }
+        headers=get_required_headers(),
     )
     data = response.json()
     if 'time_weighted_return' in data:
@@ -217,10 +204,7 @@ def get_aggregate_symphony_stats(account_uuid: str) -> Dict:
     url = f"{BASE_URL}/api/v0.1/portfolio/accounts/{account_uuid}/symphony-stats-meta"
     response = httpx.get(
         url,
-        headers={
-            "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
-            "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
-        }
+        headers=get_required_headers(),
     )
     return response.json()
 
@@ -258,10 +242,7 @@ def get_portfolio_daily_performance(account_uuid: str) -> Dict:
     url = f"{BASE_URL}/api/v0.1/portfolio/accounts/{account_uuid}/portfolio-history"
     response = httpx.get(
         url,
-        headers={
-            "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
-            "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
-        }
+        headers=get_required_headers(),
     )
     data = response.json()
     data['dates'] = [epoch_ms_to_date(d) for d in data['epoch_ms']]
@@ -301,7 +282,10 @@ def save_symphony(
             },
             json=payload
         )
-        return response.json()
+        try:
+            return response.json()
+        except Exception as e:
+            return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
     except Exception as e:
         payload_without_symphony = {k: v for k, v in payload.items() if k != "symphony"}
         return {"error": truncate_text(str(e), 1000), "payload": payload_without_symphony}
@@ -332,10 +316,7 @@ def update_saved_symphony(
     try:
         response = httpx.put(
             url,
-            headers={
-                "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
-                "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
-            },
+            headers=get_required_headers(),
             json=payload
         )
         return response.json()
@@ -352,10 +333,7 @@ def get_saved_symphony(symphony_id: str) -> SymphonyScore:
     url = f"{BASE_URL}/api/v0.1/symphonies/{symphony_id}/score"
     response = httpx.get(
         url,
-        headers={
-            "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
-            "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
-        }
+        headers=get_optional_headers(),
     )
     return response.json()
 

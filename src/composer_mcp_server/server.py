@@ -395,6 +395,25 @@ def withdraw_from_symphony(account_uuid: str, symphony_id: str, amount: float) -
     return response.json()
 
 @mcp.tool
+def cancel_invest_or_withdraw(account_uuid: str, deploy_id: str) -> str:
+    """
+    Cancel an invest or withdraw request that has not been processed yet.
+
+    This allows you to cancel a pending invest or withdraw request before it gets processed
+    during the trading period. Only requests with status QUEUED can be canceled.
+    """
+    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/deploys/{deploy_id}"
+    response = httpx.delete(
+        url,
+        headers=get_required_headers()
+    )
+    if response.status_code == 204:
+        return "Successfully canceled invest or withdraw request"
+    else:
+        return response.json()
+
+
+@mcp.tool
 def skip_automated_rebalance_for_symphony(account_uuid: str, symphony_id: str, skip: bool = True) -> str:
     """
     Skip automated rebalance for a symphony in a specific account.

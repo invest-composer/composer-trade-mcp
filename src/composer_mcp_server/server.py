@@ -1,7 +1,7 @@
 """
 Main MCP server implementation for Composer.
 """
-from typing import List, Dict, Any, Literal
+from typing import List, Dict, Any, Literal, Optional
 import httpx
 import os
 
@@ -353,7 +353,7 @@ def get_market_hours() -> Dict:
     return response.json()
 
 @mcp.tool
-def invest_in_symphony(account_id: str, symphony_id: str, amount: float) -> Dict:
+def invest_in_symphony(account_uuid: str, symphony_id: str, amount: float) -> Dict:
     """
     Invest in a symphony for a specific account.
 
@@ -365,7 +365,7 @@ def invest_in_symphony(account_id: str, symphony_id: str, amount: float) -> Dict
     """
     if amount <= 0:
         return {"error": "Amount must be greater than 0"}
-    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_id}/symphonies/{symphony_id}/invest"
+    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/invest"
     response = httpx.post(
         url,
         headers=get_required_headers(),
@@ -374,7 +374,7 @@ def invest_in_symphony(account_id: str, symphony_id: str, amount: float) -> Dict
     return response.json()
 
 @mcp.tool
-def withdraw_from_symphony(account_id: str, symphony_id: str, amount: float) -> Dict:
+def withdraw_from_symphony(account_uuid: str, symphony_id: str, amount: float) -> Dict:
     """
     Withdraw money from a symphony for a specific account.
 
@@ -386,7 +386,7 @@ def withdraw_from_symphony(account_id: str, symphony_id: str, amount: float) -> 
     """
     if amount >= 0:
         return {"error": "Amount must be less than 0"}
-    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_id}/symphonies/{symphony_id}/withdraw"
+    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/withdraw"
     response = httpx.post(
         url,
         headers=get_required_headers(),
@@ -395,14 +395,14 @@ def withdraw_from_symphony(account_id: str, symphony_id: str, amount: float) -> 
     return response.json()
 
 @mcp.tool
-def skip_automated_rebalance_for_symphony(account_id: str, symphony_id: str, skip: bool = True) -> str:
+def skip_automated_rebalance_for_symphony(account_uuid: str, symphony_id: str, skip: bool = True) -> str:
     """
     Skip automated rebalance for a symphony in a specific account.
 
     This allows you to skip the next automated rebalance for the specified symphony (will resume after the next automated rebalance).
     This is useful when you want to manually control the rebalancing process.
     """
-    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_id}/symphonies/{symphony_id}/skip-automated-rebalance"
+    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/skip-automated-rebalance"
     response = httpx.post(
         url,
         headers=get_required_headers(),
@@ -414,7 +414,7 @@ def skip_automated_rebalance_for_symphony(account_id: str, symphony_id: str, ski
         return response.json()
 
 @mcp.tool
-def go_to_cash_for_symphony(account_id: str, symphony_id: str) -> Dict:
+def go_to_cash_for_symphony(account_uuid: str, symphony_id: str) -> Dict:
     """
     Immediately sell all assets in a symphony.
 
@@ -422,7 +422,7 @@ def go_to_cash_for_symphony(account_id: str, symphony_id: str) -> Dict:
 
     "Go to cash" on the other hand will temporarily convert the holdings into cash until the next automated rebalance. (Remember you can skip the next automated rebalance with `skip_automated_rebalance_for_symphony` if you want to stay in cash longer.)
     """
-    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_id}/symphonies/{symphony_id}/go-to-cash"
+    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/go-to-cash"
     response = httpx.post(
         url,
         headers=get_required_headers()
@@ -430,13 +430,13 @@ def go_to_cash_for_symphony(account_id: str, symphony_id: str) -> Dict:
     return response.json()
 
 @mcp.tool
-def rebalance_symphony_now(account_id: str, symphony_id: str, rebalance_request_uuid: str) -> Dict:
+def rebalance_symphony_now(account_uuid: str, symphony_id: str, rebalance_request_uuid: str) -> Dict:
     """
     Rebalance a symphony NOW instead of waiting for the next automated rebalance.
 
     The rebalance_request_uuid parameter is the result of the `preview_rebalance_for_symphony` tool, so you must run that tool first.
     """
-    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_id}/symphonies/{symphony_id}/rebalance"
+    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/rebalance"
     response = httpx.post(
         url,
         headers=get_required_headers(),
@@ -445,13 +445,13 @@ def rebalance_symphony_now(account_id: str, symphony_id: str, rebalance_request_
     return response.json()
 
 @mcp.tool
-def liquidate_symphony(account_id: str, symphony_id: str) -> Dict:
+def liquidate_symphony(account_uuid: str, symphony_id: str) -> Dict:
     """
     Immediately sell all assets in a symphony (or queue for market open if outside of market hours).
 
     This tool is similar to `go_to_cash_for_symphony` except liquidated symphonies will stop rebalancing until more money is invested.
     """
-    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_id}/symphonies/{symphony_id}/liquidate"
+    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/liquidate"
     response = httpx.post(
         url,
         headers=get_required_headers()
@@ -473,7 +473,7 @@ def preview_rebalance_for_user() -> Dict:
     return response.json()
 
 @mcp.tool
-def preview_rebalance_for_symphony(account_id: str, symphony_id: str) -> Dict:
+def preview_rebalance_for_symphony(account_uuid: str, symphony_id: str) -> Dict:
     """
     Perform a dry run of rebalancing for a specific symphony to see what trades would be recommended.
 
@@ -486,13 +486,13 @@ def preview_rebalance_for_symphony(account_id: str, symphony_id: str) -> Dict:
     response = httpx.post(
         url,
         headers=get_required_headers(),
-        json={"broker_account_uuid": account_id}
+        json={"broker_account_uuid": account_uuid}
     )
     return response.json()
 
 @mcp.tool
 def execute_single_trade(
-    account_id: str,
+    account_uuid: str,
     type: Literal["MARKET", "LIMIT", "STOP", "STOP_LIMIT", "TRAILING_STOP"],
     symbol: str,
     time_in_force: Literal["GTC", "DAY", "IOC", "FOK", "OPG", "CLS"],
@@ -505,7 +505,7 @@ def execute_single_trade(
 
     One of notional or quantity must be provided.
     """
-    url = f"{BASE_URL}/api/v0.1/trading/accounts/{account_id}/order-requests"
+    url = f"{BASE_URL}/api/v0.1/trading/accounts/{account_uuid}/order-requests"
 
     payload = {
         "position_id": position_id,
@@ -530,14 +530,14 @@ def execute_single_trade(
     return response.json()
 
 @mcp.tool
-def cancel_single_trade(account_id: str, order_request_id: str) -> str:
+def cancel_single_trade(account_uuid: str, order_request_id: str) -> str:
     """
     Cancel a request for a single trade that has not executed yet.
 
     If the order request has already executed, it cannot be canceled.
     Only QUEUED or OPEN order requests can be canceled.
     """
-    url = f"{BASE_URL}/api/v0.1/trading/accounts/{account_id}/order-requests/{order_request_id}"
+    url = f"{BASE_URL}/api/v0.1/trading/accounts/{account_uuid}/order-requests/{order_request_id}"
     response = httpx.delete(
         url,
         headers=get_required_headers()

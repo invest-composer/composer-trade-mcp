@@ -28,6 +28,11 @@
   - Try asking Claude: "_Research the latest trends and news. Analyze my symphonies and determine whether I should increase / decrease my investments._"
 
 ## Quickstart with Claude Desktop
+This section will get you started with creating symphonies and backtesting them.
+You don't even need a Composer account to use these features!
+
+Note that other tools will require an [API Key](https://github.com/invest-composer/composer-mcp-server?tab=readme-ov-file#getting-your-api-key).
+
 1. Install `uv` (Python package manager) with `curl -LsSf https://astral.sh/uv/install.sh | sh` or see the `uv` [repo](https://github.com/astral-sh/uv) for additional install methods.
 1. Go to Claude > Settings > Developer > Edit Config > claude_desktop_config.json to include the following:
 
@@ -59,7 +64,7 @@ TODO
 
 ## Getting your API Key
 
-An API key will be necessary to interact with your Composer account. For example, saving a Composer Symphony for later or viewing statistics about your Composer portfolio.
+An API key will be necessary to interact with your Composer account. For example, saving a Composer Symphony for later or viewing statistics about your portfolio.
 
 Trading a symphony will require a paid subscription, although you can always liquidate a position regardless of your subscription status. Composer also includes a 14-day free trial so you can try without any commitment.
 
@@ -97,6 +102,33 @@ Get your API key from [Composer](https://app.composer.trade) by following these 
   }
 }
 ```
+
+## Available tools
+Once your LLM is connected to the Composer MCP Server, it will have access to the following tools:
+
+- `create_symphony` - Define an automated strategy using Composer's system.
+- `backtest_symphony` - Backtest a symphony that was created with `create_symphony`
+- `backtest_symphony_by_id` - Backtest an existing symphony given its ID
+- `save_symphony` - Save a symphony to the user's account
+- `update_saved_symphony` - Update a saved symphony
+- `list_accounts` - List all brokerage accounts available to the Composer user
+- `get_account_holdings` - Get the holdings of a brokerage account
+- `get_aggregate_portfolio_stats` - Get the aggregate portfolio statistics of a brokerage account
+- `get_aggregate_symphony_stats` - Get stats for every symphony in a brokerage account
+- `get_symphony_daily_performance` - Get daily performance for a specific symphony in a brokerage account
+- `get_portfolio_daily_performance` - Get the daily performance for a brokerage account
+- `get_market_hours` - Get market hours for the next week
+- `invest_in_symphony` - Invest in a symphony for a specific account
+- `withdraw_from_symphony` - Withdraw money from a symphony for a specific account
+- `cancel_invest_or_withdraw` - Cancel an invest or withdraw request that has not been processed yet
+- `skip_automated_rebalance_for_symphony` - Skip automated rebalance for a symphony in a specific account
+- `go_to_cash_for_symphony` - Immediately sell all assets in a symphony
+- `liquidate_symphony` - Immediately sell all assets in a symphony (or queue for market open if outside of market hours)
+- `preview_rebalance_for_user` - Perform a dry run of rebalancing across all accounts to see what trades would be recommended
+- `preview_rebalance_for_symphony` - Perform a dry run of rebalancing for a specific symphony to see what trades would be recommended
+- `rebalance_symphony_now` - Rebalance a symphony NOW instead of waiting for the next automated rebalance
+- `execute_single_trade` - Execute a single order for a specific symbol like you would in a traditional brokerage account
+- `cancel_single_trade` - Cancel a request for a single trade that has not executed yet
 
 ## Troubleshooting
 

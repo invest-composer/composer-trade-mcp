@@ -417,7 +417,7 @@ def save_symphony(
     validated_score= validate_symphony_score(symphony_score)
     symphony = validated_score.model_dump()
 
-    url = f"{BASE_URL}/api/v0.1/symphonies/"
+    url = f"{BASE_URL}/api/v0.1/symphonies"
     payload = {
         "name": symphony['name'],
         "asset_class": asset_class,

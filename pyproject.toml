@@ -1,6 +1,6 @@
 [project]
 name = "composer-mcp-server"
-version = "0.1.14"
+version = "0.1.15"
 description = "Composer MCP Server - Backtest and Automate your trades with LLMs"
 readme = "README.md"
 requires-python = ">=3.10"

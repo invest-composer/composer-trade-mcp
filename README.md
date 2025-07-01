@@ -117,6 +117,7 @@ Once your LLM is connected to the Composer MCP Server, it will have access to th
 - `get_aggregate_symphony_stats` - Get stats for every symphony in a brokerage account
 - `get_symphony_daily_performance` - Get daily performance for a specific symphony in a brokerage account
 - `get_portfolio_daily_performance` - Get the daily performance for a brokerage account
+- `get_saved_symphony` - Get the definition about an existing symphony given its ID.
 - `get_market_hours` - Get market hours for the next week
 - `invest_in_symphony` - Invest in a symphony for a specific account
 - `withdraw_from_symphony` - Withdraw money from a symphony for a specific account

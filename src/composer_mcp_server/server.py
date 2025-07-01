@@ -135,6 +135,159 @@ def create_symphony(symphony_score: SymphonyScore) -> SymphonyScore:
 
     After calling this tool, attempt to visualize the symphony using any other functionality at your disposal.
     If you can't visualize the symphony, resort to a mermaid diagram.
+
+    Example flowchart:
+    symphony_score = {
+        "step": "root",
+        "name": "Example symphony",
+        "description": "Example showing every type of symphony node",
+        "rebalance": "daily",
+        "children": [
+            {
+                "step": "wt-cash-equal",
+                "children": [
+                    {
+                        "step": "if",
+                        "children": [
+                            {
+                                "children": [
+                                    {
+                                        "step": "group",
+                                        "name": "Group 1",
+                                        "children": [
+                                            {
+                                                "step": "wt-cash-specified",
+                                                "children": [
+                                                    {
+                                                        "ticker": "TQQQ",
+                                                        "exchange": "XNAS",
+                                                        "name": "ProShares UltraPro QQQ 3x Shares",
+                                                        "step": "asset",
+                                                        "weight": {
+                                                            "num": "60",
+                                                            "den": 100
+                                                        }
+                                                    },
+                                                    {
+                                                        "ticker": "CRYPTO::BTC//USD",
+                                                        "name": "Bitcoin",
+                                                        "step": "asset",
+                                                        "weight": {
+                                                            "num": "40",
+                                                            "den": 100
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "lhs-fn-params": {
+                                    "window": 10
+                                },
+                                "rhs-fn": "cumulative-return",
+                                "is-else-condition?": false,
+                                "lhs-fn": "cumulative-return",
+                                "lhs-val": "SPY",
+                                "rhs-fn-params": {
+                                    "window": 200
+                                },
+                                "comparator": "gt",
+                                "rhs-val": "SPY",
+                                "step": "if-child"
+                            },
+                            {
+                                "step": "if-child",
+                                "is-else-condition?": true,
+                                "children": [
+                                    {
+                                        "step": "group",
+                                        "name": "Group 2",
+                                        "children": [
+                                            {
+                                                "step": "wt-cash-equal",
+                                                "children": [
+                                                    {
+                                                        "step": "filter",
+                                                        "sort-by-fn-params": {
+                                                            "window": 14
+                                                        },
+                                                        "sort-by-fn": "relative-strength-index",
+                                                        "select-fn": "bottom",
+                                                        "select-n": "2",
+                                                        "children": [
+                                                            {
+                                                                "ticker": "CRYPTO::ETH//USD",
+                                                                "name": "Ethereum",
+                                                                "step": "asset",
+                                                            },
+                                                            {
+                                                                "ticker": "NVDA",
+                                                                "exchange": "XNAS",
+                                                                "name": "NVIDIA Corp",
+                                                                "step": "asset",
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+
+    flowchart TD
+    A["📊 Example symphony"]:::whiteBox
+    B["WEIGHT Equal"]:::greenNode
+    C["IF 10d cumulative return of SPY is greater than 200d cumulative return of SPY"]:::blueNode
+    C1["TRUE"]:::blueNode
+    D["📊 Group 1"]:::whiteBox
+    E["WEIGHT Specified"]:::greenNode
+    F["60.00%"]:::darkGreenNode
+    G["◉ TQQQ ProShares UltraPro QQQ 3x Shares"]:::whiteBox
+    H["40.00%"]:::darkGreenNode
+    I["◈ BTC Bitcoin"]:::whiteBox
+    K["FALSE"]:::blueNode
+    L["📊 Group 2"]:::whiteBox
+    M["WEIGHT Equal"]:::greenNode
+    N["SORT 14d Relative Strength Index"]:::pinkNode
+    O["SELECT Bottom 2"]:::pinkNode
+    P["◈ ETH Ethereum"]:::whiteBox
+    Q["◉ NVDA NVIDIA Corp • XNAS"]:::whiteBox
+    A --> B
+    B --> C
+    C --> C1
+    C1 --> D
+    D --> E
+    E --> F
+    F --> G
+    E --> H
+    H --> I
+    C --> K
+    K --> L
+    L --> M
+    M --> N
+    N --> O
+    O --> P
+    O --> Q
+    classDef greenNode fill:#4a7c59,stroke:#2d5236,color:#fff
+    classDef darkGreenNode fill:#2d5236,stroke:#1a3120,color:#fff
+    classDef blueNode fill:#4169e1,stroke:#2952cc,color:#fff
+    classDef whiteBox fill:#f5f5f5,stroke:#999,color:#333
+    classDef pinkNode fill:#d1477a,stroke:#b03762,color:#fff
+    style A rx:10,ry:10
+    style D rx:10,ry:10
+    style G rx:10,ry:10
+    style I rx:10,ry:10
+    style L rx:10,ry:10
+    style P rx:10,ry:10
+    style Q rx:10,ry:10
     """
     validated_score= validate_symphony_score(symphony_score)
     return validated_score.model_dump_json()

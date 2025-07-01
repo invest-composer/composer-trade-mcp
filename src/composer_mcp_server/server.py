@@ -640,7 +640,8 @@ def preview_rebalance_for_user() -> Dict:
     url = f"{BASE_URL}/api/v0.1/dry-run"
     response = httpx.post(
         url,
-        headers=get_required_headers()
+        headers=get_required_headers(),
+        json={}
     )
     return response.json()
 
@@ -680,11 +681,9 @@ def execute_single_trade(
     url = f"{BASE_URL}/api/v0.1/trading/accounts/{account_uuid}/order-requests"
 
     payload = {
-        "position_id": position_id,
         "type": type,
         "symbol": symbol,
         "time_in_force": time_in_force,
-        "source": source
     }
 
     if notional is not None:

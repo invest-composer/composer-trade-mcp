@@ -681,11 +681,9 @@ def execute_single_trade(
     url = f"{BASE_URL}/api/v0.1/trading/accounts/{account_uuid}/order-requests"
 
     payload = {
-        "position_id": position_id,
         "type": type,
         "symbol": symbol,
         "time_in_force": time_in_force,
-        "source": source
     }
 
     if notional is not None:

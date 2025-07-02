@@ -1,0 +1,178 @@
+{
+  "dxt_version": "0.1",
+  "name": "composer",
+  "display_name": "Composer MCP Server",
+  "version": "0.1.19",
+  "description": "Backtest and automate your trades with LLMs using Composer's AI-powered trading platform",
+  "long_description": "The Composer MCP Server enables AI systems to create, backtest, and manage automated trading strategies. It provides tools for strategy creation, historical backtesting, portfolio monitoring, and live trading execution. Composer supports both equities and cryptocurrency trading with advanced features like rebalancing, risk management, and performance analytics.",
+  "author": {
+    "name": "Composer Technologies Inc.",
+    "email": "help@composer.trade",
+    "url": "https://www.composer.trade"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/invest-composer/composer-mcp-server"
+  },
+  "homepage": "https://www.composer.trade",
+  "documentation": "https://github.com/invest-composer/composer-mcp-server#readme",
+  "support": "https://github.com/invest-composer/composer-mcp-server/issues",
+  "icon": "icon.png",
+  "screenshots": [
+    "assets/screenshots/creating_a_symphony.png"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "trading",
+    "ai-trading",
+    "algorithmic-trading",
+    "backtesting",
+    "portfolio-management",
+    "investment-automation",
+    "fintech",
+    "mcp",
+    "llm"
+  ],
+  "server": {
+    "type": "python",
+    "entry_point": "src/composer_mcp_server/server.py",
+    "mcp_config": {
+      "command": "uvx",
+      "args": [
+        "--refresh",
+        "--default-index", "https://test.pypi.org/simple/",
+        "--index", "https://pypi.org/simple/",
+        "--index-strategy", "unsafe-best-match",
+        "composer-mcp-server@latest"
+      ],
+      "env": {
+        "COMPOSER_API_KEY": "${user_config.api_key}",
+        "COMPOSER_SECRET_KEY": "${user_config.secret_key}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "create_symphony",
+      "description": "Create a new trading strategy using Composer's DSL"
+    },
+    {
+      "name": "backtest_symphony",
+      "description": "Backtest a trading strategy with historical data"
+    },
+    {
+      "name": "backtest_symphony_by_id",
+      "description": "Backtest a saved symphony by its ID"
+    },
+    {
+      "name": "list_accounts",
+      "description": "List all brokerage accounts available to the user"
+    },
+    {
+      "name": "get_account_holdings",
+      "description": "Get the holdings of a brokerage account"
+    },
+    {
+      "name": "get_aggregate_portfolio_stats",
+      "description": "Get aggregate portfolio statistics"
+    },
+    {
+      "name": "get_aggregate_symphony_stats",
+      "description": "Get stats for every symphony in an account"
+    },
+    {
+      "name": "get_symphony_daily_performance",
+      "description": "Get daily performance for a specific symphony"
+    },
+    {
+      "name": "get_portfolio_daily_performance",
+      "description": "Get daily performance for a brokerage account"
+    },
+    {
+      "name": "save_symphony",
+      "description": "Save a symphony to the user's account"
+    },
+    {
+      "name": "update_saved_symphony",
+      "description": "Update an existing symphony in the user's account"
+    },
+    {
+      "name": "get_saved_symphony",
+      "description": "Get a saved symphony by ID"
+    },
+    {
+      "name": "get_market_hours",
+      "description": "Get market hours information for the next week"
+    },
+    {
+      "name": "invest_in_symphony",
+      "description": "Invest in a symphony for a specific account"
+    },
+    {
+      "name": "withdraw_from_symphony",
+      "description": "Withdraw money from a symphony for a specific account"
+    },
+    {
+      "name": "cancel_invest_or_withdraw",
+      "description": "Cancel an invest or withdraw request that has not been processed yet"
+    },
+    {
+      "name": "skip_automated_rebalance_for_symphony",
+      "description": "Skip automated rebalance for a symphony in a specific account"
+    },
+    {
+      "name": "go_to_cash_for_symphony",
+      "description": "Immediately sell all assets in a symphony"
+    },
+    {
+      "name": "rebalance_symphony_now",
+      "description": "Rebalance a symphony NOW instead of waiting for the next automated rebalance"
+    },
+    {
+      "name": "liquidate_symphony",
+      "description": "Immediately sell all assets in a symphony (or queue for market open if outside of market hours)"
+    },
+    {
+      "name": "preview_rebalance_for_user",
+      "description": "Perform a dry run of rebalancing across all accounts to see what trades would be recommended"
+    },
+    {
+      "name": "preview_rebalance_for_symphony",
+      "description": "Perform a dry run of rebalancing for a specific symphony to see what trades would be recommended"
+    },
+    {
+      "name": "execute_single_trade",
+      "description": "Execute a single order for a specific symbol like you would in a traditional brokerage account"
+    },
+    {
+      "name": "cancel_single_trade",
+      "description": "Cancel a request for a single trade that has not executed yet"
+    }
+  ],
+  "prompts": [],
+  "tools_generated": false,
+  "prompts_generated": false,
+  "compatibility": {
+    "claude_desktop": ">=1.0.0",
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "python": ">=3.10"
+    }
+  },
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "Composer API Key",
+      "description": "Your Composer API key for authentication. Get this from your Composer account settings.",
+      "sensitive": true,
+      "required": false
+    },
+    "secret_key": {
+      "type": "string",
+      "title": "Composer Secret Key",
+      "description": "Your Composer secret key for authentication. Get this from your Composer account settings.",
+      "sensitive": true,
+      "required": false
+    }
+  }
+} 

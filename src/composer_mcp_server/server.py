@@ -11,8 +11,18 @@ from fastmcp import FastMCP
 from .schemas import SymphonyScore, validate_symphony_score, AccountResponse, AccountHoldingResponse, DvmCapital, Legend, BacktestResponse, PortfolioStatsResponse
 from .utils import parse_backtest_output, truncate_text, epoch_ms_to_date, get_optional_headers, get_required_headers
 
-BASE_URL = "https://public-api-gateway-599937284915.us-central1.run.app"
-# BASE_URL = "https://api.composer.trade"
+def get_base_url() -> str:
+    """
+    Get the base URL for the Composer API based on the environment.
+    """
+    # Check for explicit base URL override
+    if base_url := os.getenv("COMPOSER_API_BASE_URL"):
+        return base_url
+    else:
+        # Default to production
+        return "https://api.composer.trade"
+
+BASE_URL = get_base_url()
 
 # Create a server instance
 mcp = FastMCP(name="Composer MCP Server")

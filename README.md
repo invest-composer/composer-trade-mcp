@@ -42,11 +42,7 @@ Note that other tools will require an [API Key](https://github.com/invest-compos
     "composer": {
       "command": "uvx",
       "args": [
-        "--refresh",
-        "--default-index", "https://test.pypi.org/simple/",
-        "--index", "https://pypi.org/simple/",
-        "--index-strategy", "unsafe-best-match",
-        "composer-mcp-server@latest"
+        "composer-mcp-server"
       ]
     }
   }
@@ -56,11 +52,6 @@ Note that other tools will require an [API Key](https://github.com/invest-compos
 4. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Create and backtest a basic 60-40 strategy._"
 
 If you're using Windows, you will have to enable "Developer Mode" in Claude Desktop to use the MCP server. Click "Help" in the hamburger menu at the top left and select "Enable Developer Mode".
-
-## (WIP) Other MCP clients
-
-For other clients like Cursor, run:
-TODO
 
 ## Getting your API Key
 
@@ -88,11 +79,7 @@ Get your API key from [Composer](https://app.composer.trade) by following these 
     "composer": {
       "command": "uvx",
       "args": [
-        "--refresh",
-        "--default-index", "https://test.pypi.org/simple/",
-        "--index", "https://pypi.org/simple/",
-        "--index-strategy", "unsafe-best-match",
-        "composer-mcp-server@latest"
+        "composer-mcp-server"
       ],
       "env": {
         "COMPOSER_API_KEY": "<insert-your-api-key-here>",

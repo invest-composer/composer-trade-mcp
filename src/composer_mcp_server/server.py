@@ -1,7 +1,7 @@
 """
 Main MCP server implementation for Composer.
 """
-from typing import List, Dict, Any, Literal, Optional
+from typing import List, Dict, Any, Literal, Optional, Union
 import httpx
 import os
 
@@ -665,11 +665,13 @@ def preview_rebalance_for_symphony(account_uuid: str, symphony_id: str) -> Dict:
 @mcp.tool
 def execute_single_trade(
     account_uuid: str,
+    side: Literal["BUY", "SELL"],
     type: Literal["MARKET", "LIMIT", "STOP", "STOP_LIMIT", "TRAILING_STOP"],
-    symbol: str,
     time_in_force: Literal["GTC", "DAY", "IOC", "FOK", "OPG", "CLS"],
-    notional: Optional[float] = None,
-    quantity: Optional[float] = None
+    symbol: str = Field(description="The symbol of the asset to trade. Note that crypto symbols are formatted like 'CRYPTO::BTC//USD' for Bitcoin."),
+    # Claude was having trouble passing float values, so let's make the field accept strings too.
+    notional: Optional[Union[float, str]] = None,
+    quantity: Optional[Union[float, str]] = None
 ) -> Dict:
     """
     Execute a single order for a specific symbol like you would in a traditional brokerage account.
@@ -686,11 +688,29 @@ def execute_single_trade(
     }
 
     if notional is not None:
-        payload["notional"] = notional
+        try:
+            payload["notional"] = float(notional)
+        except (ValueError, TypeError):
+            return {"error": f"Invalid notional value: {notional}"}
     if quantity is not None:
-        payload["quantity"] = quantity
+        try:
+            payload["quantity"] = float(quantity)
+        except (ValueError, TypeError):
+            return {"error": f"Invalid quantity value: {quantity}"}
     if not notional and not quantity:
         return {"error": "One of notional or quantity must be provided"}
+
+    # Validate notional/quantity based on side
+    if side == "BUY":
+        if notional is not None and float(notional) <= 0:
+            return {"error": "Notional must be positive for BUY orders"}
+        if quantity is not None and float(quantity) <= 0:
+            return {"error": "Quantity must be positive for BUY orders"}
+    elif side == "SELL":
+        if notional is not None and float(notional) >= 0:
+            return {"error": "Notional must be negative for SELL orders"}
+        if quantity is not None and float(quantity) >= 0:
+            return {"error": "Quantity must be negative for SELL orders"}
 
     response = httpx.post(
         url,

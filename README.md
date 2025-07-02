@@ -53,11 +53,6 @@ Note that other tools will require an [API Key](https://github.com/invest-compos
 
 If you're using Windows, you will have to enable "Developer Mode" in Claude Desktop to use the MCP server. Click "Help" in the hamburger menu at the top left and select "Enable Developer Mode".
 
-## (WIP) Other MCP clients
-
-For other clients like Cursor, run:
-TODO
-
 ## Getting your API Key
 
 An API key will be necessary to interact with your Composer account. For example, saving a Composer Symphony for later or viewing statistics about your portfolio.

@@ -139,3 +139,46 @@ which uvx
 ```
 
 Once you obtain the absolute path (e.g., `/usr/local/bin/uvx`), update your configuration to use that path (e.g., `"command": "/usr/local/bin/uvx"`). This ensures that the correct executable is referenced.
+
+## Development and Deployment
+
+### Testing
+
+The project includes GitHub Actions for continuous integration that run on every push and pull request:
+
+- **Test and Build**: Runs tests across Python 3.10, 3.11, and 3.12
+- **Package Validation**: Ensures the package builds correctly and can be installed
+
+### Releasing to PyPI
+
+To release a new version to PyPI:
+
+1. **Update the version** in `pyproject.toml`:
+   ```toml
+   [project]
+   version = "0.1.17"  # Increment this
+   ```
+
+2. **Create a GitHub release**:
+   - Go to the [Releases page](https://github.com/invest-composer/composer-mcp-server/releases)
+   - Click "Create a new release"
+   - Tag version: `v0.1.17` (must match the version in pyproject.toml)
+   - Release title: `v0.1.17`
+   - Add release notes describing the changes
+   - Publish the release
+
+3. **Automatic deployment**: The GitHub Action will automatically:
+   - Build the package
+   - Upload it to PyPI
+   - Make it available for installation via `pip install composer-mcp-server`
+
+### Required Secrets
+
+The deployment workflow requires the following GitHub repository secret:
+
+- `PYPI_API_TOKEN`: Your PyPI API token for authentication
+
+To set up the PyPI token:
+1. Go to [PyPI Account Settings](https://pypi.org/manage/account/)
+2. Create an API token with "Entire account" scope
+3. Add it as a repository secret named `PYPI_API_TOKEN`

@@ -42,11 +42,7 @@ Note that other tools will require an [API Key](https://github.com/invest-compos
     "composer": {
       "command": "uvx",
       "args": [
-        "--refresh",
-        "--default-index", "https://test.pypi.org/simple/",
-        "--index", "https://pypi.org/simple/",
-        "--index-strategy", "unsafe-best-match",
-        "composer-mcp-server@latest"
+        "composer-mcp-server"
       ]
     }
   }
@@ -88,11 +84,7 @@ Get your API key from [Composer](https://app.composer.trade) by following these 
     "composer": {
       "command": "uvx",
       "args": [
-        "--refresh",
-        "--default-index", "https://test.pypi.org/simple/",
-        "--index", "https://pypi.org/simple/",
-        "--index-strategy", "unsafe-best-match",
-        "composer-mcp-server@latest"
+        "composer-mcp-server"
       ],
       "env": {
         "COMPOSER_API_KEY": "<insert-your-api-key-here>",

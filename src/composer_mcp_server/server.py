@@ -11,8 +11,7 @@ from fastmcp import FastMCP
 from .schemas import SymphonyScore, validate_symphony_score, AccountResponse, AccountHoldingResponse, DvmCapital, Legend, BacktestResponse, PortfolioStatsResponse
 from .utils import parse_backtest_output, truncate_text, epoch_ms_to_date, get_optional_headers, get_required_headers
 
-BASE_URL = "https://public-api-gateway-599937284915.us-central1.run.app"
-# BASE_URL = "https://api.composer.trade"
+BASE_URL = "https://api.composer.trade"
 
 # Create a server instance
 mcp = FastMCP(name="Composer MCP Server")

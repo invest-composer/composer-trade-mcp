@@ -2,7 +2,7 @@
   "dxt_version": "0.1",
   "name": "composer",
   "display_name": "Composer MCP Server",
-  "version": "0.1.10",
+  "version": "0.1.19",
   "description": "Backtest and automate your trades with LLMs using Composer's AI-powered trading platform",
   "long_description": "The Composer MCP Server enables AI systems to create, backtest, and manage automated trading strategies. It provides tools for strategy creation, historical backtesting, portfolio monitoring, and live trading execution. Composer supports both equities and cryptocurrency trading with advanced features like rebalancing, risk management, and performance analytics.",
   "author": {
@@ -99,6 +99,54 @@
     {
       "name": "get_saved_symphony",
       "description": "Get a saved symphony by ID"
+    },
+    {
+      "name": "get_market_hours",
+      "description": "Get market hours information for the next week"
+    },
+    {
+      "name": "invest_in_symphony",
+      "description": "Invest in a symphony for a specific account"
+    },
+    {
+      "name": "withdraw_from_symphony",
+      "description": "Withdraw money from a symphony for a specific account"
+    },
+    {
+      "name": "cancel_invest_or_withdraw",
+      "description": "Cancel an invest or withdraw request that has not been processed yet"
+    },
+    {
+      "name": "skip_automated_rebalance_for_symphony",
+      "description": "Skip automated rebalance for a symphony in a specific account"
+    },
+    {
+      "name": "go_to_cash_for_symphony",
+      "description": "Immediately sell all assets in a symphony"
+    },
+    {
+      "name": "rebalance_symphony_now",
+      "description": "Rebalance a symphony NOW instead of waiting for the next automated rebalance"
+    },
+    {
+      "name": "liquidate_symphony",
+      "description": "Immediately sell all assets in a symphony (or queue for market open if outside of market hours)"
+    },
+    {
+      "name": "preview_rebalance_for_user",
+      "description": "Perform a dry run of rebalancing across all accounts to see what trades would be recommended"
+    },
+    {
+      "name": "preview_rebalance_for_symphony",
+      "description": "Perform a dry run of rebalancing for a specific symphony to see what trades would be recommended"
+    },
+    {
+      "name": "execute_single_trade",
+      "description": "Execute a single order for a specific symbol like you would in a traditional brokerage account"
+    },
+    {
+      "name": "cancel_single_trade",
+      "description": "Cancel a request for a single trade that has not executed yet"
     }
   ],
   "prompts": [],

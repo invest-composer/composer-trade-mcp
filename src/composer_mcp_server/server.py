@@ -1,7 +1,7 @@
 """
 Main MCP server implementation for Composer.
 """
-from typing import List, Dict, Any, Literal
+from typing import List, Dict, Any, Literal, Optional, Union
 import httpx
 import os
 
@@ -135,6 +135,159 @@ def create_symphony(symphony_score: SymphonyScore) -> SymphonyScore:
 
     After calling this tool, attempt to visualize the symphony using any other functionality at your disposal.
     If you can't visualize the symphony, resort to a mermaid diagram.
+
+    Example flowchart:
+    symphony_score = {
+        "step": "root",
+        "name": "Example symphony",
+        "description": "Example showing every type of symphony node",
+        "rebalance": "daily",
+        "children": [
+            {
+                "step": "wt-cash-equal",
+                "children": [
+                    {
+                        "step": "if",
+                        "children": [
+                            {
+                                "children": [
+                                    {
+                                        "step": "group",
+                                        "name": "Group 1",
+                                        "children": [
+                                            {
+                                                "step": "wt-cash-specified",
+                                                "children": [
+                                                    {
+                                                        "ticker": "TQQQ",
+                                                        "exchange": "XNAS",
+                                                        "name": "ProShares UltraPro QQQ 3x Shares",
+                                                        "step": "asset",
+                                                        "weight": {
+                                                            "num": "60",
+                                                            "den": 100
+                                                        }
+                                                    },
+                                                    {
+                                                        "ticker": "CRYPTO::BTC//USD",
+                                                        "name": "Bitcoin",
+                                                        "step": "asset",
+                                                        "weight": {
+                                                            "num": "40",
+                                                            "den": 100
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "lhs-fn-params": {
+                                    "window": 10
+                                },
+                                "rhs-fn": "cumulative-return",
+                                "is-else-condition?": false,
+                                "lhs-fn": "cumulative-return",
+                                "lhs-val": "SPY",
+                                "rhs-fn-params": {
+                                    "window": 200
+                                },
+                                "comparator": "gt",
+                                "rhs-val": "SPY",
+                                "step": "if-child"
+                            },
+                            {
+                                "step": "if-child",
+                                "is-else-condition?": true,
+                                "children": [
+                                    {
+                                        "step": "group",
+                                        "name": "Group 2",
+                                        "children": [
+                                            {
+                                                "step": "wt-cash-equal",
+                                                "children": [
+                                                    {
+                                                        "step": "filter",
+                                                        "sort-by-fn-params": {
+                                                            "window": 14
+                                                        },
+                                                        "sort-by-fn": "relative-strength-index",
+                                                        "select-fn": "bottom",
+                                                        "select-n": "2",
+                                                        "children": [
+                                                            {
+                                                                "ticker": "CRYPTO::ETH//USD",
+                                                                "name": "Ethereum",
+                                                                "step": "asset",
+                                                            },
+                                                            {
+                                                                "ticker": "NVDA",
+                                                                "exchange": "XNAS",
+                                                                "name": "NVIDIA Corp",
+                                                                "step": "asset",
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+
+    flowchart TD
+    A["📊 Example symphony"]:::whiteBox
+    B["WEIGHT Equal"]:::greenNode
+    C["IF 10d cumulative return of SPY is greater than 200d cumulative return of SPY"]:::blueNode
+    C1["TRUE"]:::blueNode
+    D["📊 Group 1"]:::whiteBox
+    E["WEIGHT Specified"]:::greenNode
+    F["60.00%"]:::darkGreenNode
+    G["◉ TQQQ ProShares UltraPro QQQ 3x Shares"]:::whiteBox
+    H["40.00%"]:::darkGreenNode
+    I["◈ BTC Bitcoin"]:::whiteBox
+    K["FALSE"]:::blueNode
+    L["📊 Group 2"]:::whiteBox
+    M["WEIGHT Equal"]:::greenNode
+    N["SORT 14d Relative Strength Index"]:::pinkNode
+    O["SELECT Bottom 2"]:::pinkNode
+    P["◈ ETH Ethereum"]:::whiteBox
+    Q["◉ NVDA NVIDIA Corp • XNAS"]:::whiteBox
+    A --> B
+    B --> C
+    C --> C1
+    C1 --> D
+    D --> E
+    E --> F
+    F --> G
+    E --> H
+    H --> I
+    C --> K
+    K --> L
+    L --> M
+    M --> N
+    N --> O
+    O --> P
+    O --> Q
+    classDef greenNode fill:#4a7c59,stroke:#2d5236,color:#fff
+    classDef darkGreenNode fill:#2d5236,stroke:#1a3120,color:#fff
+    classDef blueNode fill:#4169e1,stroke:#2952cc,color:#fff
+    classDef whiteBox fill:#f5f5f5,stroke:#999,color:#333
+    classDef pinkNode fill:#d1477a,stroke:#b03762,color:#fff
+    style A rx:10,ry:10
+    style D rx:10,ry:10
+    style G rx:10,ry:10
+    style I rx:10,ry:10
+    style L rx:10,ry:10
+    style P rx:10,ry:10
+    style Q rx:10,ry:10
     """
     validated_score= validate_symphony_score(symphony_score)
     return validated_score.model_dump_json()
@@ -264,7 +417,7 @@ def save_symphony(
     validated_score= validate_symphony_score(symphony_score)
     symphony = validated_score.model_dump()
 
-    url = f"{BASE_URL}/api/v0.1/symphonies/"
+    url = f"{BASE_URL}/api/v0.1/symphonies"
     payload = {
         "name": symphony['name'],
         "asset_class": asset_class,
@@ -336,6 +489,252 @@ def get_saved_symphony(symphony_id: str) -> SymphonyScore:
         headers=get_optional_headers(),
     )
     return response.json()
+
+@mcp.tool
+def get_market_hours() -> Dict:
+    """
+    Get market hours information for the next week.
+    Returns market open/close times and whether the market is currently open.
+
+    Useful for trading equities. Crypto can trade 24/7.
+    """
+    url = f"{BASE_URL}/api/v0.1/deploy/market-hours"
+    response = httpx.get(
+        url,
+        headers=get_optional_headers(),
+    )
+    return response.json()
+
+@mcp.tool
+def invest_in_symphony(account_uuid: str, symphony_id: str, amount: float) -> Dict:
+    """
+    Invest in a symphony for a specific account.
+
+    This queues a task to invest in the specified symphony. The funds will be
+    allocated according to the symphony's investment strategy during Composer's trading period (typically 10 minutes before market close).
+
+    Returns:
+        If successful, returns a Dict containing deploy_id and optional deploy_time for auto rebalance. The default deploy time is 10 minutes before market close.
+    """
+    if amount <= 0:
+        return {"error": "Amount must be greater than 0"}
+    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/invest"
+    response = httpx.post(
+        url,
+        headers=get_required_headers(),
+        json={"amount": amount}
+    )
+    return response.json()
+
+@mcp.tool
+def withdraw_from_symphony(account_uuid: str, symphony_id: str, amount: float) -> Dict:
+    """
+    Withdraw money from a symphony for a specific account.
+
+    This queues a task to withdraw from the specified symphony. The withdrawal will be
+    processed during Composer's trading period (typically 10 minutes before market close).
+
+    Returns:
+        If successful, returns a Dict containing deploy_id and optional deploy_time for auto rebalance. The default deploy time is 10 minutes before market close.
+    """
+    if amount >= 0:
+        return {"error": "Amount must be less than 0"}
+    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/withdraw"
+    response = httpx.post(
+        url,
+        headers=get_required_headers(),
+        json={"amount": amount}
+    )
+    return response.json()
+
+@mcp.tool
+def cancel_invest_or_withdraw(account_uuid: str, deploy_id: str) -> str:
+    """
+    Cancel an invest or withdraw request that has not been processed yet.
+
+    This allows you to cancel a pending invest or withdraw request before it gets processed
+    during the trading period. Only requests with status QUEUED can be canceled.
+    """
+    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/deploys/{deploy_id}"
+    response = httpx.delete(
+        url,
+        headers=get_required_headers()
+    )
+    if response.status_code == 204:
+        return "Successfully canceled invest or withdraw request"
+    else:
+        return response.json()
+
+
+@mcp.tool
+def skip_automated_rebalance_for_symphony(account_uuid: str, symphony_id: str, skip: bool = True) -> str:
+    """
+    Skip automated rebalance for a symphony in a specific account.
+
+    This allows you to skip the next automated rebalance for the specified symphony (will resume after the next automated rebalance).
+    This is useful when you want to manually control the rebalancing process.
+    """
+    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/skip-automated-rebalance"
+    response = httpx.post(
+        url,
+        headers=get_required_headers(),
+        json={"skip": skip}
+    )
+    if response.status_code == 204:
+        return "Successfully skipped next automated rebalance"
+    else:
+        return response.json()
+
+@mcp.tool
+def go_to_cash_for_symphony(account_uuid: str, symphony_id: str) -> Dict:
+    """
+    Immediately sell all assets in a symphony.
+
+    This tool is similar to `liquidate_symphony` except liquidated symphonies will stop rebalancing until more money is invested.
+
+    "Go to cash" on the other hand will temporarily convert the holdings into cash until the next automated rebalance. (Remember you can skip the next automated rebalance with `skip_automated_rebalance_for_symphony` if you want to stay in cash longer.)
+    """
+    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/go-to-cash"
+    response = httpx.post(
+        url,
+        headers=get_required_headers()
+    )
+    return response.json()
+
+@mcp.tool
+def rebalance_symphony_now(account_uuid: str, symphony_id: str, rebalance_request_uuid: str) -> Dict:
+    """
+    Rebalance a symphony NOW instead of waiting for the next automated rebalance.
+
+    The rebalance_request_uuid parameter is the result of the `preview_rebalance_for_symphony` tool, so you must run that tool first.
+    """
+    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/rebalance"
+    response = httpx.post(
+        url,
+        headers=get_required_headers(),
+        json={"rebalance_request_uuid": rebalance_request_uuid}
+    )
+    return response.json()
+
+@mcp.tool
+def liquidate_symphony(account_uuid: str, symphony_id: str) -> Dict:
+    """
+    Immediately sell all assets in a symphony (or queue for market open if outside of market hours).
+
+    This tool is similar to `go_to_cash_for_symphony` except liquidated symphonies will stop rebalancing until more money is invested.
+    """
+    url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/liquidate"
+    response = httpx.post(
+        url,
+        headers=get_required_headers()
+    )
+    return response.json()
+
+@mcp.tool
+def preview_rebalance_for_user() -> Dict:
+    """
+    Perform a dry run of rebalancing across all accounts to see what trades would be recommended.
+
+    This tool shows what trades would be executed if a rebalance were to happen now, for all the user's symphonies, without actually executing them.
+    """
+    url = f"{BASE_URL}/api/v0.1/dry-run"
+    response = httpx.post(
+        url,
+        headers=get_required_headers(),
+        json={}
+    )
+    return response.json()
+
+@mcp.tool
+def preview_rebalance_for_symphony(account_uuid: str, symphony_id: str) -> Dict:
+    """
+    Perform a dry run of rebalancing for a specific symphony to see what trades would be recommended.
+
+    This tool shows what trades would be executed if a rebalance were to happen now for the specified symphony, without actually executing them.
+
+    Returns the projected trades and a rebalance_request_uuid.
+    The uuid can be passed to `rebalance_symphony_now` to actually execute the trades.
+    """
+    url = f"{BASE_URL}/api/v0.1/dry-run/trade-preview/{symphony_id}"
+    response = httpx.post(
+        url,
+        headers=get_required_headers(),
+        json={"broker_account_uuid": account_uuid}
+    )
+    return response.json()
+
+@mcp.tool
+def execute_single_trade(
+    account_uuid: str,
+    side: Literal["BUY", "SELL"],
+    type: Literal["MARKET", "LIMIT", "STOP", "STOP_LIMIT", "TRAILING_STOP"],
+    time_in_force: Literal["GTC", "DAY", "IOC", "FOK", "OPG", "CLS"],
+    symbol: str = Field(description="The symbol of the asset to trade. Note that crypto symbols are formatted like 'CRYPTO::BTC//USD' for Bitcoin."),
+    # Claude was having trouble passing float values, so let's make the field accept strings too.
+    notional: Optional[Union[float, str]] = None,
+    quantity: Optional[Union[float, str]] = None
+) -> Dict:
+    """
+    Execute a single order for a specific symbol like you would in a traditional brokerage account.
+    This is useful for holding assets that you do not want to rebalance.
+
+    One of notional or quantity must be provided.
+    """
+    url = f"{BASE_URL}/api/v0.1/trading/accounts/{account_uuid}/order-requests"
+
+    payload = {
+        "type": type,
+        "symbol": symbol,
+        "time_in_force": time_in_force,
+    }
+
+    if notional is not None:
+        try:
+            payload["notional"] = float(notional)
+        except (ValueError, TypeError):
+            return {"error": f"Invalid notional value: {notional}"}
+    if quantity is not None:
+        try:
+            payload["quantity"] = float(quantity)
+        except (ValueError, TypeError):
+            return {"error": f"Invalid quantity value: {quantity}"}
+    if not notional and not quantity:
+        return {"error": "One of notional or quantity must be provided"}
+
+    # Validate notional/quantity based on side
+    if side == "BUY":
+        if notional is not None and float(notional) <= 0:
+            return {"error": "Notional must be positive for BUY orders"}
+        if quantity is not None and float(quantity) <= 0:
+            return {"error": "Quantity must be positive for BUY orders"}
+    elif side == "SELL":
+        if notional is not None and float(notional) >= 0:
+            return {"error": "Notional must be negative for SELL orders"}
+        if quantity is not None and float(quantity) >= 0:
+            return {"error": "Quantity must be negative for SELL orders"}
+
+    response = httpx.post(
+        url,
+        headers=get_required_headers(),
+        json=payload
+    )
+    return response.json()
+
+@mcp.tool
+def cancel_single_trade(account_uuid: str, order_request_id: str) -> str:
+    """
+    Cancel a request for a single trade that has not executed yet.
+
+    If the order request has already executed, it cannot be canceled.
+    Only QUEUED or OPEN order requests can be canceled.
+    """
+    url = f"{BASE_URL}/api/v0.1/trading/accounts/{account_uuid}/order-requests/{order_request_id}"
+    response = httpx.delete(
+        url,
+        headers=get_required_headers()
+    )
+    return response.json()
+
 
 def main():
     """Main entry point for the composer-mcp-server."""

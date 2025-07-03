@@ -51,8 +51,14 @@ Note that other tools will require an [API Key](https://github.com/invest-compos
   }
 }
 ```
-3. If this doesn't work, check the "[Spawn uvx ENOENT](https://github.com/invest-composer/composer-mcp-server?tab=readme-ov-file#mcp-composer-spawn-uvx-enoent)" section below.
-4. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Create and backtest a basic 60-40 strategy._"
+3. If the previous step doesn't work, you most likely need to replace `"command": "uvx"` with the actual location of `uvx` on your computer.
+   1. Run this command in your terminal:
+      ```bash
+      which uvx
+      ```
+   2. Copy the result and replace `"command": "uvx"` with `"command": "<The result of 'which uvx'>"`
+   3. Close Claude and re-open to reload the MCP server.
+5. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Create and backtest a basic 60-40 strategy._"
 
 If you're using Windows, you will have to enable "Developer Mode" in Claude Desktop to use the MCP server. Click "Help" in the hamburger menu at the top left and select "Enable Developer Mode".
 
@@ -121,23 +127,6 @@ Once your LLM is connected to the Composer MCP Server, it will have access to th
 - `execute_single_trade` - Execute a single order for a specific symbol like you would in a traditional brokerage account
 - `cancel_single_trade` - Cancel a request for a single trade that has not executed yet
 
-## Troubleshooting
-
-Logs when running with Claude Desktop can be found at:
-
-- **Windows**: `%APPDATA%\Claude\logs\mcp-server-composer.log`
-- **macOS**: `~/Library/Logs/Claude/mcp-server-composer.log`
-
-### MCP Composer: spawn uvx ENOENT
-
-If you encounter the error "MCP Composer: spawn uvx ENOENT", confirm its absolute path by running this command in your terminal:
-
-```bash
-which uvx
-```
-
-Once you obtain the absolute path (e.g., `/usr/local/bin/uvx`), update your configuration to use that path (e.g., `"command": "/usr/local/bin/uvx"`). This ensures that the correct executable is referenced.
-
 ## Recommendations
 We recommend the following for the best experience with Composer:
 - Use Claude Opus 4 instead of Sonnet. Opus is much better at tool use.
@@ -145,3 +134,9 @@ We recommend the following for the best experience with Composer:
 - Tools that execute trades or affect your funds should only be allowed once. Do not set them to "Always Allow".
   - The following tools should be handled with care: `invest_in_symphony`, `withdraw_from_symphony`, `skip_automated_rebalance_for_symphony`, `go_to_cash_for_symphony`, `liquidate_symphony`, `rebalance_symphony_now`, `execute_single_trade`
 
+## Troubleshooting
+
+Logs when running with Claude Desktop can be found at:
+
+- **Windows**: `%APPDATA%\Claude\logs\mcp-server-composer.log`
+- **macOS**: `~/Library/Logs/Claude/mcp-server-composer.log`

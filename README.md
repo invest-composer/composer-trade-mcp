@@ -8,7 +8,9 @@
 
 </div>
 
-
+<p align="center">
+  <strong>Vibe Trading is here!</strong>
+</p>
 <p align="center">
   Official <a href="https://www.composer.trade">Composer</a> Model Context Protocol (MCP) server that allows MCP-enabled LLMs like Claude Desktop, Cursor, OpenAI Agents and others to validate investment ideas via backtests and even trade multiple strategies (called "symphonies") in parallel to compare their live performance.
 </p>
@@ -135,3 +137,11 @@ which uvx
 ```
 
 Once you obtain the absolute path (e.g., `/usr/local/bin/uvx`), update your configuration to use that path (e.g., `"command": "/usr/local/bin/uvx"`). This ensures that the correct executable is referenced.
+
+## Recommendations
+We recommend the following for the best experience with Composer:
+- Use Claude Opus 4 instead of Sonnet. Opus is much better at tool use.
+- Turn on Claude's Research mode if you need the latest financial data and news.
+- Tools that execute trades or affect your funds should only be allowed once. Do not set them to "Always Allow".
+  - The following tools should be handled with care: `invest_in_symphony`, `withdraw_from_symphony`, `skip_automated_rebalance_for_symphony`, `go_to_cash_for_symphony`, `liquidate_symphony`, `rebalance_symphony_now`, `execute_single_trade`
+

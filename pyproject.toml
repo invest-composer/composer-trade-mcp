@@ -1,6 +1,6 @@
 [project]
-name = "composer-mcp-server"
-version = "0.1.20"
+name = "composer-trade-mcp"
+version = "0.1.0"
 description = "Composer MCP Server - Backtest and Automate your trades with LLMs"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -47,13 +47,13 @@ dependencies = [
 ]
 
 [project.scripts]
-composer-mcp-server = "composer_mcp_server.server:main"
+composer-trade-mcp = "composer_trade_mcp.server:main"
 
 [project.urls]
-Homepage = "https://github.com/invest-composer/composer-mcp-server"
-Repository = "https://github.com/invest-composer/composer-mcp-server.git"
-Documentation = "https://github.com/invest-composer/composer-mcp-server#readme"
-Issues = "https://github.com/invest-composer/composer-mcp-server/issues"
+Homepage = "https://github.com/invest-composer/composer-trade-mcp"
+Repository = "https://github.com/invest-composer/composer-trade-mcp.git"
+Documentation = "https://github.com/invest-composer/composer-trade-mcp#readme"
+Issues = "https://github.com/invest-composer/composer-trade-mcp/issues"
 
 [build-system]
 requires = ["hatchling"]

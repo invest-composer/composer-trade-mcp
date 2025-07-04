@@ -3,7 +3,7 @@
 <div class="title-block" style="text-align: center;" align="center">
 
   [![Twitter](https://img.shields.io/badge/Twitter-@ComposerTrade-000000.svg?style=for-the-badge&logo=x&labelColor=000)](https://x.com/composertrade)
-  [![PyPI](https://img.shields.io/badge/PyPI-composer--mcp-000000.svg?style=for-the-badge&logo=pypi&labelColor=000)](https://pypi.org/project/composer-mcp-server)
+  [![PyPI](https://img.shields.io/badge/PyPI-composer--mcp-000000.svg?style=for-the-badge&logo=pypi&labelColor=000)](https://pypi.org/project/composer-trade-mcp)
   [![Reddit Community](https://img.shields.io/badge/reddit-r/ComposerTrade-000000.svg?style=for-the-badge&logo=reddit&labelColor=000)](https://www.reddit.com/r/ComposerTrade)
 
 </div>
@@ -23,7 +23,7 @@
 - **Backtest your ideas**
   - Our Backtesting API provides a fast feedback loop for AI to iterate and validate its hypotheses.
   - Try asking Claude: "_Compare the strategy's performance against the S&P 500. Plot the results._"
-- **Monitor performance** (requires [API Key](https://github.com/invest-composer/composer-mcp-server?tab=readme-ov-file#getting-your-api-key))
+- **Monitor performance** (requires [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key))
   - View performance statistics for your overall account as well as for individual symphonies.
   - Try asking Claude: "_Identify my best-performing symphonies. Analyze why they are working._"
 - **Control your investments** (requires API Key + [Composer subscription](https://www.composer.trade/pricing))
@@ -34,7 +34,7 @@
 This section will get you started with creating symphonies and backtesting them.
 You don't even need a Composer account to use these features!
 
-Note that other tools will require an [API Key](https://github.com/invest-composer/composer-mcp-server?tab=readme-ov-file#getting-your-api-key).
+Note that other tools will require an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
 
 1. Install `uv` (Python package manager) with `curl -LsSf https://astral.sh/uv/install.sh | sh` or see the `uv` [repo](https://github.com/astral-sh/uv) for additional install methods.
 1. Go to Claude > Settings > Developer > Edit Config > claude_desktop_config.json to include the following:
@@ -45,7 +45,7 @@ Note that other tools will require an [API Key](https://github.com/invest-compos
     "composer": {
       "command": "uvx",
       "args": [
-        "composer-mcp-server"
+        "composer-trade-mcp"
       ]
     }
   }
@@ -88,7 +88,7 @@ Get your API key from [Composer](https://app.composer.trade) by following these 
     "composer": {
       "command": "uvx",
       "args": [
-        "composer-mcp-server"
+        "composer-trade-mcp"
       ],
       "env": {
         "COMPOSER_API_KEY": "<insert-your-api-key-here>",

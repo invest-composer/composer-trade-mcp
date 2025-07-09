@@ -37,13 +37,9 @@
     "type": "python",
     "entry_point": "src/composer_trade_mcp/server.py",
     "mcp_config": {
-      "command": "uvx",
+      "command": "${HOME}/.local/bin/uvx",
       "args": [
-        "--refresh",
-        "--default-index", "https://test.pypi.org/simple/",
-        "--index", "https://pypi.org/simple/",
-        "--index-strategy", "unsafe-best-match",
-        "composer-trade-mcp@latest"
+        "composer-trade-mcp"
       ],
       "env": {
         "COMPOSER_API_KEY": "${user_config.api_key}",
@@ -153,7 +149,7 @@
   "tools_generated": false,
   "prompts_generated": false,
   "compatibility": {
-    "claude_desktop": ">=1.0.0",
+    "claude_desktop": ">=0.11.0",
     "platforms": ["darwin", "win32", "linux"],
     "runtimes": {
       "python": ">=3.10"
@@ -175,4 +171,4 @@
       "required": false
     }
   }
-} 
+}

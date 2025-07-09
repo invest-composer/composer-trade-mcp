@@ -23,6 +23,9 @@
 - **Backtest your ideas**
   - Our Backtesting API provides a fast feedback loop for AI to iterate and validate its hypotheses.
   - Try asking Claude: "_Compare the strategy's performance against the S&P 500. Plot the results._"
+- **Find a strategy tailored for you**
+  - Provide your criteria to the AI and it will search through our database of 1000+ strategies to find one that suits your needs.
+  - Try asking Claude: "_Find me a strategy with better risk-reward characteristics than Bitcoin._"
 - **Monitor performance** (requires [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key))
   - View performance statistics for your overall account as well as for individual symphonies.
   - Try asking Claude: "_Identify my best-performing symphonies. Analyze why they are working._"
@@ -104,6 +107,7 @@ Once your LLM is connected to the Composer MCP Server, it will have access to th
 
 - `create_symphony` - Define an automated strategy using Composer's system.
 - `backtest_symphony` - Backtest a symphony that was created with `create_symphony`
+- `search_symphonies` - Search through a database of existing Composer symphonies.
 - `backtest_symphony_by_id` - Backtest an existing symphony given its ID
 - `save_symphony` - Save a symphony to the user's account
 - `update_saved_symphony` - Update a saved symphony

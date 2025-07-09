@@ -132,7 +132,7 @@ def backtest_symphony(symphony_score: SymphonyScore,
         return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
 
 @mcp.tool
-def create_symphony(symphony_score: SymphonyScore) -> SymphonyScore:
+def create_symphony(symphony_score: SymphonyScore) -> Dict:
     """
     Composer is a DSL for constructing automated trading strategies. It can only enter long positions and cannot stay in cash.
 
@@ -300,7 +300,7 @@ def create_symphony(symphony_score: SymphonyScore) -> SymphonyScore:
     style Q rx:10,ry:10
     """
     validated_score= validate_symphony_score(symphony_score)
-    return validated_score.model_dump_json()
+    return validated_score.model_dump()
 
 @mcp.tool
 def search_symphonies(where: List = [["and", [">", "oos_num_backtest_days", 180],

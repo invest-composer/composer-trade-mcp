@@ -37,13 +37,29 @@ You don't even need a Composer account to use these features!
 Note that other tools will require an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
 
 1. Install `uv` (Python package manager) with `curl -LsSf https://astral.sh/uv/install.sh | sh` or see the `uv` [repo](https://github.com/astral-sh/uv) for additional install methods.
+1. Download [composer-trade-mcp.dxt](https://storage.googleapis.com/www.investcomposer.com/downloads/composer-trade-mcp.dxt)
+1. Go to Claude > Settings > Extensions then drag the `composer-trade-mcp.dxt` file into the window.
+
+<div align="center">
+ <img src="https://github.com/user-attachments/assets/e5ffe326-41ec-4f8c-8b6f-e2abf3340622" alt="CleanShot 2025-06-25 at 14 35 15@2x" width="500">
+</div>
+
+4. Click "Install"
+    - You can choose to add your [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key) here for more advanced features but it's not necessary for backtesting.
+1. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Create and backtest a basic 60-40 strategy._"
+
+## Manual install
+If the approach above did not work or your AI client doesn't support DXT, you can try the following:
+
+1. Install `uv` (Python package manager) with `curl -LsSf https://astral.sh/uv/install.sh | sh` or see the `uv` [repo](https://github.com/astral-sh/uv) for additional install methods.
+1. Open your Terminal and run `which uvx`
 1. Go to Claude > Settings > Developer > Edit Config > claude_desktop_config.json to include the following:
 
 ```
 {
   "mcpServers": {
     "composer": {
-      "command": "uvx",
+      "command": "uvx",  <--------- Replace "uvx" with the result of `which uvx` in the prior step
       "args": [
         "composer-trade-mcp"
       ]
@@ -51,16 +67,7 @@ Note that other tools will require an [API Key](https://github.com/invest-compos
   }
 }
 ```
-3. If the previous step doesn't work, you most likely need to replace `"command": "uvx"` with the actual location of `uvx` on your computer.
-   1. Run this command in your terminal:
-      ```bash
-      which uvx
-      ```
-   2. Copy the result and replace `"command": "uvx"` with `"command": "<The result of 'which uvx'>"`
-   3. Close Claude and re-open to reload the MCP server.
-5. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Create and backtest a basic 60-40 strategy._"
-
-If you're using Windows, you will have to enable "Developer Mode" in Claude Desktop to use the MCP server. Click "Help" in the hamburger menu at the top left and select "Enable Developer Mode".
+4. Close and re-open Claude and you can now interact with Composer!
 
 ## Getting your API Key
 
@@ -81,7 +88,12 @@ Get your API key from [Composer](https://app.composer.trade) by following these 
    <div align="center">
      <img src="https://github.com/user-attachments/assets/dd4d2828-6bfd-4db5-9fe0-6a78694f87c6" alt="CleanShot 2025-06-25 at 14 35 15@2x" width="500">
    </div>
-1. Modify your `claude_desktop_config.json` to include your API key and secret:
+1. Depending on how you installed the Composer MCP server, do the following:
+    1. If you installed via `composer-trade-mcp.dxt`:
+        - Go to Claude > Settings > Extensions > Composer MCP Server > Configure
+        - Add your API Key and Secret
+    1. If you installed via `claude_desktop_config.json`:
+        - Modify your `claude_desktop_config.json` to include your API key and secret:
 ```
 {
   "mcpServers": {

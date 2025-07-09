@@ -57,6 +57,10 @@
       "description": "Backtest a trading strategy with historical data"
     },
     {
+      "name": "search_symphonies",
+      "description": "Search through a database of existing Composer symphonies"
+    },
+    {
       "name": "backtest_symphony_by_id",
       "description": "Backtest a saved symphony by its ID"
     },

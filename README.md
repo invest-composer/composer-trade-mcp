@@ -118,6 +118,7 @@ Once your LLM is connected to the Composer MCP Server, it will have access to th
 - `backtest_symphony` - Backtest a symphony that was created with `create_symphony`
 - `backtest_symphony_by_id` - Backtest an existing symphony given its ID
 - `save_symphony` - Save a symphony to the user's account
+- `copy_symphony` - Copy an existing symphony to the user's account
 - `update_saved_symphony` - Update a saved symphony
 - `list_accounts` - List all brokerage accounts available to the Composer user
 - `get_account_holdings` - Get the holdings of a brokerage account

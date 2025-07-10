@@ -412,8 +412,6 @@ def get_portfolio_daily_performance(account_uuid: str) -> Dict:
     del data['epoch_ms']
     return data
 
-# FIXME: This tool is not working.
-# Error message is:  "Expecting value: line 1 column 2 (char 1)" which is pretty vague.
 @mcp.tool
 def save_symphony(
     symphony_score: SymphonyScore,
@@ -454,6 +452,27 @@ def save_symphony(
         return {"error": truncate_text(str(e), 1000), "payload": payload_without_symphony}
 
 @mcp.tool
+def copy_symphony(
+    symphony_id: str
+) -> Dict:
+    """
+    Copy a symphony by its ID. Returns the copied symphony's symphony ID.
+    """
+    url = f"{BASE_URL}/api/v0.1/symphonies/{symphony_id}/copy"
+    try:
+        response = httpx.post(
+            url,
+            headers=get_required_headers(),
+            json={}
+        )
+        try:
+            return response.json()
+        except Exception as e:
+            return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
+    except Exception as e:
+        return {"error": truncate_text(str(e), 1000), "symphony_id": symphony_id}
+
+@mcp.tool
 def update_saved_symphony(
     symphony_id: str,
     symphony_score: SymphonyScore,
@@ -488,7 +507,7 @@ def update_saved_symphony(
         return {"error": truncate_text(str(e), 1000), "payload": payload_without_symphony}
 
 @mcp.tool
-def get_saved_symphony(symphony_id: str) -> SymphonyScore:
+def get_saved_symphony(symphony_id: str) -> Dict:
     """
     Get a saved symphony.
     Useful when you are given a URL like "https://app.composer.trade/symphony/{<symphony_id>}/details"
@@ -525,6 +544,8 @@ def invest_in_symphony(account_uuid: str, symphony_id: str, amount: float) -> Di
 
     Returns:
         If successful, returns a Dict containing deploy_id and optional deploy_time for auto rebalance. The default deploy time is 10 minutes before market close.
+
+    If investing fails with a "Symphony not found" error, you will need to run `copy_symphony` first.
     """
     if amount <= 0:
         return {"error": "Amount must be greater than 0"}

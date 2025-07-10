@@ -360,7 +360,7 @@ def search_symphonies(where: List = [["and", [">", "oos_num_backtest_days", 180]
         - A symphony is likely overfit if its OOS performance is much worse than its training performance.
     - Generally we want returns to beat SPY but risk to be lower than BTC.
     - Generally we want small symphonies.
-        - A good heuristic is to look for symphonies with fewer than 100 IF and FILTER nodes.
+        - A good heuristic is to look for symphonies with fewer than 50 IF and FILTER nodes.
         - A symphony with fewer than 10 IF and FILTER nodes is particularly small and worth calling out if it has strong performance.
 
     Before calling this tool, try to understand the user's appetite for risk relative to the S&P 500 and Bitcoin.

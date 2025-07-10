@@ -347,18 +347,20 @@ def search_symphonies(where: List = [["and", [">", "oos_num_backtest_days", 180]
       and oos annualized return greater than 20% (i.e., 0.2)
       Sort by OOS cumulative return descending:
       where: ["and",
-                [">", "oos_num_backtest_days", 365],
+                [">", "oos_num_backtest_days", 180],
                 [">", "oos_annualized_rate_of_return", "oos_spy_annualized_rate_of_return"],
                 [">", "train_annualized_rate_of_return", "train_spy_annualized_rate_of_return"],
                 ["<", "oos_max_drawdown", "oos_btcusd_max_drawdown"],
-                ["<", "train_max_drawdown", "train_btcusd_max_drawdown"],
-                [">", "oos_annualized_rate_of_return", 0.2]]
+                ["<", "train_max_drawdown", "train_btcusd_max_drawdown"]]
       order_by: [["oos_cumulative_return", "desc"]]
 
     Tips for finding good symphonies:
     - We want to avoid overfit symphonies.
         - A symphony is likely overfit if its OOS performance is much worse than its training performance.
     - Generally we want returns to beat SPY but risk to be lower than BTC.
+        - Ex: ["and",
+              [">" "oos_annualized_rate_of_return", "oos_spy_annualized_rate_of_return"],
+              ["<" "oos_max_drawdown", "oos_btcusd_max_drawdown"]]
     - Generally we want small symphonies.
         - A good heuristic is to look for symphonies with fewer than 50 IF and FILTER nodes.
         - A symphony with fewer than 10 IF and FILTER nodes is particularly small and worth calling out if it has strong performance.

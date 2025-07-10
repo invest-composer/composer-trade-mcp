@@ -157,3 +157,6 @@ Logs when running with Claude Desktop can be found at:
 
 - **Windows**: `%APPDATA%\Claude\logs\mcp-server-composer.log`
 - **macOS**: `~/Library/Logs/Claude/mcp-server-composer.log`
+
+---
+_Please review the [API & MCP Server Disclosure](https://storage.googleapis.com/www.investcomposer.com/docs/COM%20sh%20-%20API%20%26%20MCP%20Server%20Disclosure.pdf) before using the API_

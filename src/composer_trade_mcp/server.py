@@ -302,6 +302,91 @@ def create_symphony(symphony_score: SymphonyScore) -> Dict:
     validated_score= validate_symphony_score(symphony_score)
     return validated_score.model_dump()
 
+@mcp.tool
+def search_symphonies(where: List = [["and", [">", "oos_num_backtest_days", 180],
+                                      ["<", "oos_max_drawdown", "oos_btcusd_max_drawdown"]]],
+                      order_by: List = [["oos_cumulative_return", "desc"]],
+                      offset: int = 0) -> List:
+    """
+    You have access to a database of Composer symphonies with the following statistics:
+    - calmar_ratio
+    - cumulative_return
+    - max_drawdown
+    - sharpe_ratio
+    - standard_deviation
+    - trailing_one_month_return
+    - trailing_three_month_return
+    - trailing_one_year_return
+
+    Each of these statistics is calculated over 6 different variants:
+    - oos - out of sample (backtest range)
+    - oos_spy - performance of SPY over the OOS period
+    - oos_btcusd - performance of BTC/USD over the OOS period
+    - train - training period (all data before the OOS period)
+    - train_spy - performance of SPY over the training period
+    - train_btcusd - performance of BTC/USD over the training period
+
+    If you prefix a statistic with "oos_", it is the value of that statistic for the symphony over the OOS period.
+    The same applies for "train_", "oos_spy_", "oos_btcusd_", etc.
+
+    Some other statistics that don't follow this pattern are:
+    - num_backtest_days - number of calendar days in the backtest range
+      - only has oos_ and train_ variants
+    - alpha, beta, pearson_r, r_square
+      - only has oos_spy_, oos_btcusd_, train_spy_, and train_btcusd_ variants b/c they are comparing the symphony to SPY and BTC/USD
+    - num_node_asset, num_node_filter, num_node_group, num_node_if, num_node_if_child, num_node_wt_cash_equal, num_node_wt_cash_specified, num_node_wt_inverse_vol
+        - no variants because they are just counts of the number of nodes of each type in the symphony.
+
+    The arguments where, order_by, and offset all follow HoneySQL (Clojure) syntax.
+    Use offset to paginate through the results. The limit is set to 5.
+
+    Example:
+    - Find symphonies with more than 1 year of OOS backtest data
+      and annualized return greater than SPY's in both OOS and training periods
+      and max drawdown lower than BTC's in both OOS and training periods
+      and oos annualized return greater than 20% (i.e., 0.2)
+      Sort by OOS cumulative return descending:
+      where: ["and",
+                [">", "oos_num_backtest_days", 180],
+                [">", "oos_annualized_rate_of_return", "oos_spy_annualized_rate_of_return"],
+                [">", "train_annualized_rate_of_return", "train_spy_annualized_rate_of_return"],
+                ["<", "oos_max_drawdown", "oos_btcusd_max_drawdown"],
+                ["<", "train_max_drawdown", "train_btcusd_max_drawdown"]]
+      order_by: [["oos_cumulative_return", "desc"]]
+
+    Tips for finding good symphonies:
+    - We want to avoid overfit symphonies.
+        - A symphony is likely overfit if its OOS performance is much worse than its training performance.
+    - Generally we want returns to beat SPY but risk to be lower than BTC.
+        - Ex: ["and",
+              [">" "oos_annualized_rate_of_return", "oos_spy_annualized_rate_of_return"],
+              ["<" "oos_max_drawdown", "oos_btcusd_max_drawdown"]]
+    - Generally we want small symphonies.
+        - A good heuristic is to look for symphonies with fewer than 50 IF and FILTER nodes.
+        - A symphony with fewer than 10 IF and FILTER nodes is particularly small and worth calling out if it has strong performance.
+
+    Before calling this tool, try to understand the user's appetite for risk relative to the S&P 500 and Bitcoin.
+    Are they willing to take on Bitcoin-levels of risk for similar returns, or do they prefer similar risk to S&P 500, or even lower?
+
+    Always include the symphony_url in your response so the user can click on it to view the symphony in more detail.
+    """
+    url = f"{BASE_URL}/api/v0.1/search/symphonies"
+    response = httpx.post(
+        url,
+        headers=get_optional_headers(),
+        json={"where": where, "order_by": order_by, "offset": offset}
+    )
+    try:
+        results = response.json()
+        symphony_url_base = "https://test.investcomposer.com" if BASE_URL != "https://api.composer.trade" else "https://app.composer.trade"
+        for item in results:
+            if "symphony_sid" in item:
+                item["symphony_url"] = f"{symphony_url_base}/symphony/{item['symphony_sid']}/details"
+                del item["symphony_sid"]
+        return results
+    except Exception as e:
+        return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
+
 # Could be a resource but Claude Desktop doesn't autonomously call resources yet.
 @mcp.tool
 def list_accounts() -> List[AccountResponse]:
@@ -316,7 +401,10 @@ def list_accounts() -> List[AccountResponse]:
         url,
         headers=get_required_headers(),
     )
-    return response.json()["accounts"]
+    try:
+        return response.json()["accounts"]
+    except Exception as e:
+        return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
 
 @mcp.tool
 def get_account_holdings(account_uuid: str) -> List[AccountHoldingResponse]:
@@ -662,7 +750,7 @@ def liquidate_symphony(account_uuid: str, symphony_id: str) -> Dict:
     return response.json()
 
 @mcp.tool
-def preview_rebalance_for_user() -> Dict:
+def preview_rebalance_for_user() -> List:
     """
     Perform a dry run of rebalancing across all accounts to see what trades would be recommended.
 

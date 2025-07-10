@@ -748,7 +748,7 @@ def liquidate_symphony(account_uuid: str, symphony_id: str) -> Dict:
     return response.json()
 
 @mcp.tool
-def preview_rebalance_for_user() -> Dict:
+def preview_rebalance_for_user() -> List:
     """
     Perform a dry run of rebalancing across all accounts to see what trades would be recommended.
 

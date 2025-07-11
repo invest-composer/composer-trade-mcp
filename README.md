@@ -33,6 +33,8 @@
   - Ask AI to analyze your investments and adjust your exposure accordingly!
   - Try asking Claude: "_Research the latest trends and news. Analyze my symphonies and determine whether I should increase / decrease my investments._"
 
+‼️ **WARNING: Composer's symphony schema takes up nearly all of the available context window on Claude's free plan. Please upgrade your Anthropic plan to get the full benefit of the MCP server.** ‼️
+
 ## Quickstart with Claude Desktop
 This section will get you started with creating symphonies and backtesting them.
 You don't even need a Composer account to use these features!

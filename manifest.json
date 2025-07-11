@@ -49,10 +49,6 @@
   },
   "tools": [
     {
-      "name": "create_symphony",
-      "description": "Create a new trading strategy using Composer's DSL"
-    },
-    {
       "name": "backtest_symphony",
       "description": "Backtest a trading strategy with historical data"
     },

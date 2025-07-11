@@ -49,7 +49,7 @@ Note that other tools will require an [API Key](https://github.com/invest-compos
 
 4. Click "Install"
     - You can choose to add your [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key) here for more advanced features but it's not necessary for backtesting.
-1. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Create and backtest a basic 60-40 strategy._"
+1. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Backtest a basic 60-40 strategy._"
 
 ## Manual install
 If the approach above did not work or your AI client doesn't support DXT, you can try the following:
@@ -117,8 +117,7 @@ Get your API key from [Composer](https://app.composer.trade) by following these 
 ## Available tools
 Once your LLM is connected to the Composer MCP Server, it will have access to the following tools:
 
-- `create_symphony` - Define an automated strategy using Composer's system.
-- `backtest_symphony` - Backtest a symphony that was created with `create_symphony`
+- `backtest_symphony` - Backtest a symphony that was created by AI
 - `search_symphonies` - Search through a database of existing Composer symphonies.
 - `backtest_symphony_by_id` - Backtest an existing symphony given its ID
 - `save_symphony` - Save a symphony to the user's account

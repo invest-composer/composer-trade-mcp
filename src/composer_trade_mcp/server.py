@@ -91,62 +91,16 @@ def backtest_symphony(symphony_score: SymphonyScore,
                             spread_markup: float = 0.002,
                             benchmark_tickers: List[str] = ["SPY"]) -> Dict:
     """
-    Backtest a symphony that was created with `create_symphony`.
-    Use `include_daily_values=False` to reduce the response size (default is True).
-    Daily values are cumulative returns since the first day of the backtest (i.e., 19 means 19% cumulative return since the first day).
-    If start_date is not provided, the backtest will start from the earliest backtestable date.
-    You should default to backtesting from the first day of the year in order to reduce the response size.
-    If end_date is not provided, the backtest will end on the last day with data.
+    Backtest a symphony that uses Composer's Symphony Score format.
 
-    After calling this tool, visualize the results. daily_values can be easily loaded into a pandas dataframe for plotting.
-    """
-    url = f"{BASE_URL}/api/v0.1/backtest"
-    validated_score= validate_symphony_score(symphony_score)
-    params = {
-        "symphony": {"raw_value": validated_score.model_dump()},
-        "apply_reg_fee": apply_reg_fee,
-        "apply_taf_fee": apply_taf_fee,
-        "broker": broker,
-        "capital": capital,
-        "slippage_percent": slippage_percent,
-        "spread_markup": spread_markup,
-        "benchmark_tickers": benchmark_tickers,
-    }
-    if start_date:
-        params["start_date"] = start_date
-    if end_date:
-        params["end_date"] = end_date
-    response = httpx.post(
-        url,
-        headers=get_optional_headers(),
-        json=params
-    )
-    try:
-        output = response.json()
-        output["capital"] = capital
-        if output.get("stats"):
-            return parse_backtest_output(BacktestResponse(**output), include_daily_values)
-        else:
-            return output
-    except Exception as e:
-        return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
-
-@mcp.tool
-def create_symphony(symphony_score: SymphonyScore) -> Dict:
-    """
-    Composer is a DSL for constructing automated trading strategies. It can only enter long positions and cannot stay in cash.
+    Symphony Score is a DSL for constructing automated trading strategies. It can only enter long positions and cannot stay in cash.
 
     ### Available Data
     - US Equity Adjusted Close prices and Crypto prices (daily granularity at 4PM ET)
 
-    Before creating a symphony, check with the user for the asset classes they want to use.
-    Assume equities are the default asset class.
     Note that symphonies with both equities and crypto must use daily or threshold (rebalance=None) rebalancing.
 
-    After calling this tool, attempt to visualize the symphony using any other functionality at your disposal.
-    If you can't visualize the symphony, resort to a mermaid diagram.
-
-    Example flowchart:
+    Example Symphony Score:
     symphony_score = {
         "step": "root",
         "name": "Example symphony",
@@ -252,55 +206,44 @@ def create_symphony(symphony_score: SymphonyScore) -> Dict:
         ]
     }
 
-    flowchart TD
-    A["📊 Example symphony"]:::whiteBox
-    B["WEIGHT Equal"]:::greenNode
-    C["IF 10d cumulative return of SPY is greater than 200d cumulative return of SPY"]:::blueNode
-    C1["TRUE"]:::blueNode
-    D["📊 Group 1"]:::whiteBox
-    E["WEIGHT Specified"]:::greenNode
-    F["60.00%"]:::darkGreenNode
-    G["◉ TQQQ ProShares UltraPro QQQ 3x Shares"]:::whiteBox
-    H["40.00%"]:::darkGreenNode
-    I["◈ BTC Bitcoin"]:::whiteBox
-    K["FALSE"]:::blueNode
-    L["📊 Group 2"]:::whiteBox
-    M["WEIGHT Equal"]:::greenNode
-    N["SORT 14d Relative Strength Index"]:::pinkNode
-    O["SELECT Bottom 2"]:::pinkNode
-    P["◈ ETH Ethereum"]:::whiteBox
-    Q["◉ NVDA NVIDIA Corp • XNAS"]:::whiteBox
-    A --> B
-    B --> C
-    C --> C1
-    C1 --> D
-    D --> E
-    E --> F
-    F --> G
-    E --> H
-    H --> I
-    C --> K
-    K --> L
-    L --> M
-    M --> N
-    N --> O
-    O --> P
-    O --> Q
-    classDef greenNode fill:#4a7c59,stroke:#2d5236,color:#fff
-    classDef darkGreenNode fill:#2d5236,stroke:#1a3120,color:#fff
-    classDef blueNode fill:#4169e1,stroke:#2952cc,color:#fff
-    classDef whiteBox fill:#f5f5f5,stroke:#999,color:#333
-    classDef pinkNode fill:#d1477a,stroke:#b03762,color:#fff
-    style A rx:10,ry:10
-    style D rx:10,ry:10
-    style G rx:10,ry:10
-    style I rx:10,ry:10
-    style L rx:10,ry:10
-    style P rx:10,ry:10
-    style Q rx:10,ry:10
+    Use `include_daily_values=False` to reduce the response size (default is True).
+    Daily values are cumulative returns since the first day of the backtest (i.e., 19 means 19% cumulative return since the first day).
+    If start_date is not provided, the backtest will start from the earliest backtestable date.
+    You should default to backtesting from the first day of the year in order to reduce the response size.
+    If end_date is not provided, the backtest will end on the last day with data.
+
+    After calling this tool, visualize the results. daily_values can be easily loaded into a pandas dataframe for plotting.
     """
+    url = f"{BASE_URL}/api/v0.1/backtest"
     validated_score= validate_symphony_score(symphony_score)
-    return validated_score.model_dump()
+    params = {
+        "symphony": {"raw_value": validated_score.model_dump()},
+        "apply_reg_fee": apply_reg_fee,
+        "apply_taf_fee": apply_taf_fee,
+        "broker": broker,
+        "capital": capital,
+        "slippage_percent": slippage_percent,
+        "spread_markup": spread_markup,
+        "benchmark_tickers": benchmark_tickers,
+    }
+    if start_date:
+        params["start_date"] = start_date
+    if end_date:
+        params["end_date"] = end_date
+    response = httpx.post(
+        url,
+        headers=get_optional_headers(),
+        json=params
+    )
+    try:
+        output = response.json()
+        output["capital"] = capital
+        if output.get("stats"):
+            return parse_backtest_output(BacktestResponse(**output), include_daily_values)
+        else:
+            return output
+    except Exception as e:
+        return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
 
 @mcp.tool
 def search_symphonies(where: List = [["and", [">", "oos_num_backtest_days", 180],
@@ -509,6 +452,7 @@ def save_symphony(
 ) -> Dict:
     """
     Save a symphony to the user's account. If successful, returns the symphony ID.
+    You should check that the symphony is valid by backtesting it before saving.
     """
     validated_score= validate_symphony_score(symphony_score)
     symphony = validated_score.model_dump()

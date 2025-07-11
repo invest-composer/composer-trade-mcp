@@ -40,6 +40,7 @@ You don't even need a Composer account to use these features!
 Note that other tools will require an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
 
 1. Make sure you have [Python 3.10](https://www.python.org/downloads/) (or higher).
+   - Check your version by running `python3 --version` in the terminal.
 1. Install `uv` (Python package manager) with `curl -LsSf https://astral.sh/uv/install.sh | sh` or see the `uv` [repo](https://github.com/astral-sh/uv) for additional install methods.
 1. Download [composer-trade-mcp.dxt](https://storage.googleapis.com/www.investcomposer.com/downloads/composer-trade-mcp.dxt)
 1. Go to Claude > Settings > Extensions then drag the `composer-trade-mcp.dxt` file into the window.
@@ -56,6 +57,7 @@ Note that other tools will require an [API Key](https://github.com/invest-compos
 If the approach above did not work or your AI client doesn't support DXT, you can try the following:
 
 1. Make sure you have [Python 3.10](https://www.python.org/downloads/) (or higher).
+   - Check your version by running `python3 --version` in the terminal.
 1. Install `uv` (Python package manager) with `curl -LsSf https://astral.sh/uv/install.sh | sh` or see the `uv` [repo](https://github.com/astral-sh/uv) for additional install methods.
 1. Open your Terminal and run `which uvx`
 1. Go to Claude > Settings > Developer > Edit Config > claude_desktop_config.json to include the following:

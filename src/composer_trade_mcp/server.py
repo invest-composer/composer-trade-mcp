@@ -445,14 +445,14 @@ def get_portfolio_daily_performance(account_uuid: str) -> Dict:
 
 @mcp.tool
 def save_symphony(
-    symphony_score: SymphonyScore,
+    symphony_score: Dict,
     color: Literal["#AEC3C6", "#E3BC99", "#49D1E3", "#829DFF", "#FF6B6B", "#39D088", "#FC5100", "#FFBB38", "#FFB4ED", "#17BAFF", "#BA84FF"] ,
     hashtag: str = Field(description="Memorable hashtag for the symphony. Think of it like the ticker symbol of the symphony. (EX: '#BTD' for a symphony called 'Buy the Dip')"),
     asset_class: Literal["EQUITIES", "CRYPTO"] = "EQUITIES"
 ) -> Dict:
     """
     Save a symphony to the user's account. If successful, returns the symphony ID.
-    You should check that the symphony is valid by backtesting it before saving.
+    You should check that the Symphony Score is valid by backtesting it before saving.
     """
     validated_score= validate_symphony_score(symphony_score)
     symphony = validated_score.model_dump()
@@ -507,7 +507,7 @@ def copy_symphony(
 @mcp.tool
 def update_saved_symphony(
     symphony_id: str,
-    symphony_score: SymphonyScore,
+    symphony_score: Dict,
     color: Literal["#AEC3C6", "#E3BC99", "#49D1E3", "#829DFF", "#FF6B6B", "#39D088", "#FC5100", "#FFBB38", "#FFB4ED", "#17BAFF", "#BA84FF"],
     hashtag: str = Field(description="Memorable hashtag for the symphony. Think of it like the ticker symbol of the symphony. (EX: '#BTD' for a symphony called 'Buy the Dip')"),
     asset_class: Literal["EQUITIES", "CRYPTO"] = "EQUITIES"

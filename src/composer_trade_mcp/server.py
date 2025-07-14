@@ -11,6 +11,13 @@ from fastmcp import FastMCP
 from .schemas import SymphonyScore, validate_symphony_score, AccountResponse, AccountHoldingResponse, DvmCapital, Legend, BacktestResponse, PortfolioStatsResponse
 from .utils import parse_backtest_output, truncate_text, epoch_ms_to_date, get_optional_headers, get_required_headers
 
+import asyncio
+import logging
+
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(format="[%(levelname)s]: %(message)s", level=logging.INFO)
+
 def get_base_url() -> str:
     """
     Get the base URL for the Composer API based on the environment.
@@ -879,7 +886,8 @@ async def cancel_single_trade(account_uuid: str, order_request_id: str) -> str:
         )
     return response.json()
 
-
 def main():
-    """Main entry point for the composer-mcp-server."""
-    mcp.run()
+    asyncio.run(
+        mcp.run_async()
+    )
+    logger.info(f"🚀 MCP server started!")

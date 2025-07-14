@@ -36,10 +36,9 @@
 ‼️ **WARNING: Composer's symphony schema takes up nearly all of the available context window on Claude's free plan. Please upgrade your Anthropic plan to get the full benefit of the MCP server.** ‼️
 
 ## Quickstart with Claude Desktop
-This section will get you started with creating symphonies and backtesting them.
-You don't even need a Composer account to use these features!
+This section will get you started with creating symphonies and backtesting them. You don't even need a Composer account to use these features! Note that more advanced features will require an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
 
-Note that other tools will require an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
+**To use the Composer MCP, you’ll need the Claude Pro or Max [plan](https://www.anthropic.com/pricing).**
 
 1. Make sure you have [Python 3.10](https://www.python.org/downloads/) (or higher).
    - Check your version by running `python3 --version` in the terminal.

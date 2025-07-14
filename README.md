@@ -12,7 +12,7 @@
   <strong>Vibe Trading is here!</strong>
 </p>
 <p align="center">
-  Official <a href="https://www.composer.trade">Composer</a> Model Context Protocol (MCP) server that allows MCP-enabled LLMs like Claude Desktop, Cursor, OpenAI Agents and others to validate investment ideas via backtests and even trade multiple strategies (called "symphonies") in parallel to compare their live performance.
+  Official <a href="https://www.composer.trade">Composer</a> Model Context Protocol (MCP) server that allows MCP-enabled LLMs like Claude to validate investment ideas via backtests and even trade multiple strategies (called "symphonies") in parallel to compare their live performance.
 </p>
 
 ## Features

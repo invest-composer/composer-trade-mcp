@@ -11,6 +11,13 @@ from fastmcp import FastMCP
 from .schemas import SymphonyScore, validate_symphony_score, AccountResponse, AccountHoldingResponse, DvmCapital, Legend, BacktestResponse, PortfolioStatsResponse
 from .utils import parse_backtest_output, truncate_text, epoch_ms_to_date, get_optional_headers, get_required_headers
 
+import asyncio
+import logging
+
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(format="[%(levelname)s]: %(message)s", level=logging.INFO)
+
 def get_base_url() -> str:
     """
     Get the base URL for the Composer API based on the environment.
@@ -629,12 +636,16 @@ async def get_market_hours() -> Dict:
     Useful for trading equities. Crypto can trade 24/7.
     """
     url = f"{BASE_URL}/api/v0.1/deploy/market-hours"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            url,
-            headers=get_optional_headers(),
-        )
-    return response.json()
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=get_optional_headers(),
+            )
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error getting market hours: {e}")
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def invest_in_symphony(account_uuid: str, symphony_id: str, amount: float) -> Dict:
@@ -652,13 +663,17 @@ async def invest_in_symphony(account_uuid: str, symphony_id: str, amount: float)
     if amount <= 0:
         return {"error": "Amount must be greater than 0"}
     url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/invest"
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url,
-            headers=get_required_headers(),
-            json={"amount": amount}
-        )
-    return response.json()
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
+                headers=get_required_headers(),
+                    json={"amount": amount}
+                )
+            return response.json()
+    except Exception as e:
+        logger.error(f"Error investing in symphony: {e}")
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def withdraw_from_symphony(account_uuid: str, symphony_id: str, amount: float) -> Dict:
@@ -674,13 +689,17 @@ async def withdraw_from_symphony(account_uuid: str, symphony_id: str, amount: fl
     if amount >= 0:
         return {"error": "Amount must be less than 0"}
     url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/withdraw"
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url,
-            headers=get_required_headers(),
-            json={"amount": amount}
-        )
-    return response.json()
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
+                headers=get_required_headers(),
+                json={"amount": amount}
+            )
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error withdrawing from symphony: {e}")
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def cancel_invest_or_withdraw(account_uuid: str, deploy_id: str) -> str:
@@ -732,12 +751,16 @@ async def go_to_cash_for_symphony(account_uuid: str, symphony_id: str) -> Dict:
     "Go to cash" on the other hand will temporarily convert the holdings into cash until the next automated rebalance. (Remember you can skip the next automated rebalance with `skip_automated_rebalance_for_symphony` if you want to stay in cash longer.)
     """
     url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/go-to-cash"
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url,
-            headers=get_required_headers()
-        )
-    return response.json()
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
+                headers=get_required_headers()
+            )
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error going to cash for symphony: {e}")
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def rebalance_symphony_now(account_uuid: str, symphony_id: str, rebalance_request_uuid: str) -> Dict:
@@ -747,13 +770,17 @@ async def rebalance_symphony_now(account_uuid: str, symphony_id: str, rebalance_
     The rebalance_request_uuid parameter is the result of the `preview_rebalance_for_symphony` tool, so you must run that tool first.
     """
     url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/rebalance"
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url,
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
             headers=get_required_headers(),
             json={"rebalance_request_uuid": rebalance_request_uuid}
         )
-    return response.json()
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error rebalancing symphony: {e}")
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def liquidate_symphony(account_uuid: str, symphony_id: str) -> Dict:
@@ -763,12 +790,16 @@ async def liquidate_symphony(account_uuid: str, symphony_id: str) -> Dict:
     This tool is similar to `go_to_cash_for_symphony` except liquidated symphonies will stop rebalancing until more money is invested.
     """
     url = f"{BASE_URL}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/liquidate"
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url,
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
             headers=get_required_headers()
         )
-    return response.json()
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error liquidating symphony: {e}")
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def preview_rebalance_for_user() -> List:
@@ -778,13 +809,17 @@ async def preview_rebalance_for_user() -> List:
     This tool shows what trades would be executed if a rebalance were to happen now, for all the user's symphonies, without actually executing them.
     """
     url = f"{BASE_URL}/api/v0.1/dry-run"
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url,
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
             headers=get_required_headers(),
             json={}
         )
-    return response.json()
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error previewing rebalance for user: {e}")
+        return [{"error": truncate_text(str(e), 1000)}]
 
 @mcp.tool
 async def preview_rebalance_for_symphony(account_uuid: str, symphony_id: str) -> Dict:
@@ -797,13 +832,17 @@ async def preview_rebalance_for_symphony(account_uuid: str, symphony_id: str) ->
     The uuid can be passed to `rebalance_symphony_now` to actually execute the trades.
     """
     url = f"{BASE_URL}/api/v0.1/dry-run/trade-preview/{symphony_id}"
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url,
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
             headers=get_required_headers(),
             json={"broker_account_uuid": account_uuid}
         )
-    return response.json()
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error previewing rebalance for symphony: {e}")
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def execute_single_trade(
@@ -855,13 +894,17 @@ async def execute_single_trade(
         if quantity is not None and float(quantity) >= 0:
             return {"error": "Quantity must be negative for SELL orders"}
 
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url,
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
             headers=get_required_headers(),
             json=payload
-        )
-    return response.json()
+            )
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error executing single trade: {e}")
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def cancel_single_trade(account_uuid: str, order_request_id: str) -> str:
@@ -875,11 +918,15 @@ async def cancel_single_trade(account_uuid: str, order_request_id: str) -> str:
     async with httpx.AsyncClient() as client:
         response = await client.delete(
             url,
-            headers=get_required_headers()
-        )
-    return response.json()
-
+        headers=get_required_headers()
+    )
+    if response.status_code == 204:
+        return "Successfully canceled order"
+    else:
+        return response.json()
 
 def main():
-    """Main entry point for the composer-mcp-server."""
-    mcp.run()
+    asyncio.run(
+        mcp.run_async()
+    )
+    logger.info(f"🚀 MCP server started!")

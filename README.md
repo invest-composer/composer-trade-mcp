@@ -40,6 +40,7 @@ This section will get you started with creating symphonies and backtesting them.
 
 **To use the Composer MCP, you’ll need the Claude Pro or Max [plan](https://www.anthropic.com/pricing).**
 
+1. Make sure you have [Claude Desktop](https://claude.ai/download) installed.
 1. Make sure you have [Python 3.10](https://www.python.org/downloads/) (or higher).
    - Check your version by running `python3 --version` in the terminal.
 1. Install `uv` (Python package manager) with `curl -LsSf https://astral.sh/uv/install.sh | sh` or see the `uv` [repo](https://github.com/astral-sh/uv) for additional install methods.
@@ -50,7 +51,7 @@ This section will get you started with creating symphonies and backtesting them.
  <img src="https://github.com/user-attachments/assets/e5ffe326-41ec-4f8c-8b6f-e2abf3340622" alt="CleanShot 2025-06-25 at 14 35 15@2x" width="500">
 </div>
 
-4. Click "Install"
+6. Click "Install"
     - You can choose to add your [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key) here for more advanced features but it's not necessary for backtesting.
 1. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Create and backtest a basic 60-40 strategy._"
 
@@ -75,7 +76,7 @@ If the approach above did not work or your AI client doesn't support DXT, you ca
   }
 }
 ```
-4. Close and re-open Claude and you can now interact with Composer!
+5. Close and re-open Claude and you can now interact with Composer!
 
 ## Getting your API Key
 
@@ -118,6 +119,7 @@ Get your API key from [Composer](https://app.composer.trade) by following these 
   }
 }
 ```
+6. Quit and re-open Claude to apply your changes.
 
 ## Available tools
 Once your LLM is connected to the Composer MCP Server, it will have access to the following tools:

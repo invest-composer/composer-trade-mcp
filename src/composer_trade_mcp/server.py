@@ -925,8 +925,19 @@ async def cancel_single_trade(account_uuid: str, order_request_id: str) -> str:
     else:
         return response.json()
 
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check():
+    """
+    Health check endpoint.
+    """
+    return "OK"
+
 def main():
     asyncio.run(
-        mcp.run_async()
+        mcp.run_async(
+            transport="streamable-http",
+            host="0.0.0.0",
+            port=os.getenv("PORT", 8080),
+        )
     )
-    logger.info(f"🚀 MCP server started!")
+    logger.info(f"🚀 MCP server started on port {os.getenv('PORT', 8080)}!")

@@ -32,7 +32,7 @@ env:
   APP_SERVICE_ACCOUNT: "${{ inputs.service_name }}@${{ inputs.gcp_project_name }}.iam.gserviceaccount.com"
   DEPLOY_SERVICE_ACCOUNT: "deploy-admin@${{ inputs.gcp_project_name }}.iam.gserviceaccount.com"
   REGION: ${{ inputs.gcp_region }}
-  PORT: 8080
+  MCP_PORT: 8080
 
 jobs:
   deploy:
@@ -80,4 +80,4 @@ jobs:
             --max-instances 1 \
             --memory 512Mi \
             --cpu 1 \
-            --set-env-vars "PORT=${{ env.PORT }}"
+            --set-env-vars "MCP_PORT=${{ env.MCP_PORT }}"

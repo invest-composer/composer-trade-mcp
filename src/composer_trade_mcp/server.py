@@ -937,7 +937,7 @@ def main():
         mcp.run_async(
             transport="streamable-http",
             host="0.0.0.0",
-            port=os.getenv("PORT", 8080),
+            port=os.getenv("MCP_PORT", 8080),
         )
     )
-    logger.info(f"🚀 MCP server started on port {os.getenv('PORT', 8080)}!")
+    logger.info(f"🚀 MCP server started on port {os.getenv('MCP_PORT', 8080)}!")

@@ -6,6 +6,8 @@ import httpx
 import os
 
 from pydantic import Field
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from fastmcp import FastMCP
 from .schemas import SymphonyScore, validate_symphony_score, AccountResponse, AccountHoldingResponse, DvmCapital, Legend, BacktestResponse, PortfolioStatsResponse
@@ -926,18 +928,19 @@ async def cancel_single_trade(account_uuid: str, order_request_id: str) -> str:
         return response.json()
 
 @mcp.custom_route("/health", methods=["GET"])
-async def health_check():
-    """
-    Health check endpoint.
-    """
-    return "OK"
+async def health_check(request: Request) -> JSONResponse:
+    return JSONResponse({"status": "healthy"})
+
+@mcp.custom_route("/", methods=["GET"])
+async def startup_check(request: Request) -> JSONResponse:
+    return JSONResponse({"status": "ok"})
 
 def main():
     asyncio.run(
         mcp.run_async(
-            transport="streamable-http",
+            transport="http",
             host="0.0.0.0",
-            port=os.getenv("MCP_PORT", 8080),
+            port=int(os.getenv("MCP_PORT", 8080)),
         )
     )
     logger.info(f"🚀 MCP server started on port {os.getenv('MCP_PORT', 8080)}!")

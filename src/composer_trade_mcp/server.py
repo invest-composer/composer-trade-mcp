@@ -374,14 +374,14 @@ async def search_symphonies(where: List = [["and", [">", "oos_num_backtest_days"
 
     Always include the symphony_url in your response so the user can click on it to view the symphony in more detail.
     """
-    url = f"{get_base_url()}/api/v0.1/search/symphonies"
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url,
-            headers=get_optional_headers(),
-            json={"where": where, "order_by": order_by, "offset": offset}
-        )
     try:
+        url = f"{get_base_url()}/api/v0.1/search/symphonies"
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
+                headers=get_optional_headers(),
+                json={"where": where, "order_by": order_by, "offset": offset}
+            )
         results = response.json()
         symphony_url_base = "https://test.investcomposer.com" if get_mcp_environment() == "dev" else "https://app.composer.trade"
         for item in results:

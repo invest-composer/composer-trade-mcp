@@ -5,6 +5,12 @@ Authentication utilities for Composer MCP Server.
 from fastmcp.server.dependencies import get_http_headers
 from typing import Dict
 
+def get_mcp_environment() -> str:
+    """
+    Get the environment of the MCP server.
+    """
+    headers = get_http_headers()
+    return headers.get("x-composer-mcp-environment", "prod")
 
 def get_optional_headers() -> Dict[str, str]:
     """

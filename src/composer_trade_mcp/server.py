@@ -488,10 +488,7 @@ async def get_symphony_daily_performance(account_uuid: str, symphony_id: str) ->
     async with httpx.AsyncClient() as client:
         response = await client.get(
             url,
-            headers={
-                "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
-                "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
-            }
+            headers=get_required_headers(),
         )
     data = response.json()
     data['dates'] = [epoch_ms_to_date(d) for d in data['epoch_ms']]
@@ -544,10 +541,7 @@ async def save_symphony(
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 url,
-                headers={
-                    "x-api-key-id": os.getenv("COMPOSER_API_KEY"),
-                    "Authorization": f"Bearer {os.getenv('COMPOSER_SECRET_KEY')}"
-                },
+                headers=get_required_headers(),
                 json=payload
             )
         try:

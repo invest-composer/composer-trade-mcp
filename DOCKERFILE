@@ -14,7 +14,7 @@ ENV PYTHONUNBUFFERED=1
 # Install dependencies
 RUN uv sync
 
-EXPOSE $MCP_PORT
+EXPOSE $PORT
 
 # Run the FastMCP server
 CMD ["uv", "run", "composer-trade-mcp"]

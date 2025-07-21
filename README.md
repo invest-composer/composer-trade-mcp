@@ -50,7 +50,7 @@ Use the links below to jump to the instructions for your preferred LLM client:
 1. Go to Claude > Settings > Extensions then click "Install Extension" and select `composer-trade-mcp.dxt`.
 1. Click "Install"
     - You can choose to add your [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key) here for more advanced features but it's not necessary for backtesting.
-1. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Create and backtest a basic 60-40 strategy._"
+1. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Find the Composer strategies with the highest alpha._"
 
 ## Quickstart with Cursor
 Use one of the following links depending on whether you want to use the MCP server with or without an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
@@ -65,6 +65,8 @@ Use one of the following links depending on whether you want to use the MCP serv
     ```
     cursor://anysphere.cursor-deeplink/mcp/install?name=composer&config=eyJjb21tYW5kIjoibnB4IC15IG1jcC1yZW1vdGUgaHR0cHM6Ly9tY3AuY29tcG9zZXIudHJhZGUvbWNwLyAtLWhlYWRlciB4LWFwaS1rZXktaWQ6JHtDT01QT1NFUl9BUElfS0VZfSAtLWhlYWRlciBBdXRob3JpemF0aW9uOiR7Q09NUE9TRVJfU0VDUkVUX0tFWX0iLCJlbnYiOnsiQ09NUE9TRVJfQVBJX0tFWSI6IlJFUExBQ0VfV0lUSF9ZT1VSX0FQSV9LRVkiLCJDT01QT1NFUl9TRUNSRVRfS0VZIjoiQmVhcmVyIFJFUExBQ0VfRlJPTV9IRVJFX1dJVEhfWU9VUl9TRUNSRVRfS0VZIn19
     ```
+
+Try asking Cursor something like, "_Find the Composer strategies with the highest alpha._"
 
 ## Manual install for other LLM clients
 

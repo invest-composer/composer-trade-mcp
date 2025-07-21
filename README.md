@@ -12,71 +12,84 @@
   <strong>Vibe Trading is here!</strong>
 </p>
 <p align="center">
-  Official <a href="https://www.composer.trade">Composer</a> Model Context Protocol (MCP) server that allows MCP-enabled LLMs like Claude to validate investment ideas via backtests and even trade multiple strategies (called "symphonies") in parallel to compare their live performance.
+  Official <a href="https://www.composer.trade">Composer</a> Model Context Protocol (MCP) server that allows MCP-enabled LLMs like Cursor and Claude to validate investment ideas via backtests and even trade multiple strategies (called "symphonies") in parallel to compare their live performance.
 </p>
 
 ## Features
 - **Create automated investing strategies**
   - Use indicators like Relative Strength Index (RSI), Moving Average (MA), and Exponential Moving Average (EMA) with a diverse range of equity and crypto offerings to build your ideal portfolio.
   - Don't just make one-off trades. Composer symphonies constantly monitor the market and rebalance accordingly.
-  - Try asking Claude: "_Build me a crypto strategy with a maximum drawdown of 30% or less._"
+  - Try asking: "_Build me a crypto strategy with a maximum drawdown of 30% or less._"
 - **Backtest your ideas**
   - Our Backtesting API provides a fast feedback loop for AI to iterate and validate its hypotheses.
-  - Try asking Claude: "_Compare the strategy's performance against the S&P 500. Plot the results._"
+  - Try asking: "_Compare the strategy's performance against the S&P 500. Plot the results._"
 - **Find a strategy tailored for you**
   - Provide your criteria to the AI and it will search through our database of 1000+ strategies to find one that suits your needs.
-  - Try asking Claude: "_Find me a strategy with better risk-reward characteristics than Bitcoin._"
+  - Try asking: "_Find me a strategy with better risk-reward characteristics than Bitcoin._"
 - **Monitor performance** (requires [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key))
   - View performance statistics for your overall account as well as for individual symphonies.
-  - Try asking Claude: "_Identify my best-performing symphonies. Analyze why they are working._"
+  - Try asking: "_Identify my best-performing symphonies. Analyze why they are working._"
 - **Control your investments** (requires API Key + [Composer subscription](https://www.composer.trade/pricing))
   - Ask AI to analyze your investments and adjust your exposure accordingly!
-  - Try asking Claude: "_Research the latest trends and news. Analyze my symphonies and determine whether I should increase / decrease my investments._"
+  - Try asking: "_Research the latest trends and news. Analyze my symphonies and determine whether I should increase / decrease my investments._"
 
-‼️ **WARNING: Composer's symphony schema takes up nearly all of the available context window on Claude's free plan. Please upgrade your Anthropic plan to get the full benefit of the MCP server.** ‼️
+# Installation
+This section will get you started with creating symphonies and backtesting them. You don't even need a Composer account to use these features! Note that more advanced features will require an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
+
+Use the links below to jump to the instructions for your preferred LLM client:
+- [Claude Desktop](https://github.com/invest-composer/composer-trade-mcp#quickstart-with-claude-desktop)
+- [Cursor](https://github.com/invest-composer/composer-trade-mcp#quickstart-with-cursor)
+- [Other LLMs](https://github.com/invest-composer/composer-trade-mcp#manual-install-for-other-llm-clients)
 
 ## Quickstart with Claude Desktop
-This section will get you started with creating symphonies and backtesting them. You don't even need a Composer account to use these features! Note that more advanced features will require an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
 
 **To use the Composer MCP, you’ll need the Claude Pro or Max [plan](https://www.anthropic.com/pricing).**
 
 1. Make sure you have [Claude Desktop](https://claude.ai/download) installed.
-1. Make sure you have [Python 3.10](https://www.python.org/downloads/) (or higher).
-   - Check your version by running `python3 --version` in the terminal.
-1. Install `uv` (Python package manager) with `curl -LsSf https://astral.sh/uv/install.sh | sh` or see the `uv` [repo](https://github.com/astral-sh/uv) for additional install methods.
 1. Download [composer-trade-mcp.dxt](https://storage.googleapis.com/www.investcomposer.com/downloads/composer-trade-mcp.dxt)
-1. Go to Claude > Settings > Extensions then drag the `composer-trade-mcp.dxt` file into the window.
-
-<div align="center">
- <img src="https://github.com/user-attachments/assets/e5ffe326-41ec-4f8c-8b6f-e2abf3340622" alt="CleanShot 2025-06-25 at 14 35 15@2x" width="500">
-</div>
-
-6. Click "Install"
+1. Go to Claude > Settings > Extensions then click "Install Extension" and select `composer-trade-mcp.dxt`.
+1. Click "Install"
     - You can choose to add your [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key) here for more advanced features but it's not necessary for backtesting.
 1. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Create and backtest a basic 60-40 strategy._"
 
-## Manual install
-If the approach above did not work or your AI client doesn't support DXT, you can try the following:
+## Quickstart with Cursor
+Use one of the following links depending on whether you want to use the MCP server with or without an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
 
-1. Make sure you have [Python 3.10](https://www.python.org/downloads/) (or higher).
-   - Check your version by running `python3 --version` in the terminal.
-1. Install `uv` (Python package manager) with `curl -LsSf https://astral.sh/uv/install.sh | sh` or see the `uv` [repo](https://github.com/astral-sh/uv) for additional install methods.
-1. Open your Terminal and run `which uvx`
-1. Go to Claude > Settings > Developer > Edit Config > claude_desktop_config.json to include the following:
+- Without an API Key
+  - [![Install MCP Server](https://cursor.com/deeplink/mcp-install-light.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=composer&config=eyJjb21tYW5kIjoibnB4IC15IG1jcC1yZW1vdGUgaHR0cHM6Ly9tY3AuY29tcG9zZXIudHJhZGUvbWNwLyJ9)
+ - With an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key) (recommended)
+  - [![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=composer&config=eyJjb21tYW5kIjoibnB4IC15IG1jcC1yZW1vdGUgaHR0cHM6Ly9tY3AuY29tcG9zZXIudHJhZGUvbWNwLyAtLWhlYWRlciB4LWFwaS1rZXktaWQ6JHtDT01QT1NFUl9BUElfS0VZfSAtLWhlYWRlciBBdXRob3JpemF0aW9uOiR7Q09NUE9TRVJfU0VDUkVUX0tFWX0iLCJlbnYiOnsiQ09NUE9TRVJfQVBJX0tFWSI6IlJFUExBQ0VfV0lUSF9ZT1VSX0FQSV9LRVkiLCJDT01QT1NFUl9TRUNSRVRfS0VZIjoiQmVhcmVyIFJFUExBQ0VfRlJPTV9IRVJFX1dJVEhfWU9VUl9TRUNSRVRfS0VZIn19)
+
+## Manual install for other LLM clients
+
+‼️ **NOTE: ChatGPT does not support our authentication method. OpenAI also doesn't allow custom MCP servers unless you have the ChatGPT Pro Plan ($200/mo).** :‼️
+
+To install for any other MCP-enabled LLM, you can add the following to your MCP configuration JSON:
 
 ```
 {
   "mcpServers": {
     "composer": {
-      "command": "uvx",  <--------- Replace "uvx" with the result of `which uvx` in the prior step
+      "command": "npx",
       "args": [
-        "composer-trade-mcp"
-      ]
+        "-y",
+        "mcp-remote",
+        "https://mcp.composer.trade/mcp/",
+        "--header",
+        "x-api-key-id:${COMPOSER_API_KEY}",
+        "--header",
+        "Authorization:${COMPOSER_SECRET_KEY}"
+      ],
+      "env": {
+        "COMPOSER_API_KEY": "REPLACE_WITH_YOUR_API_KEY",
+        "COMPOSER_SECRET_KEY": "Bearer REPLACE_FROM_HERE_WITH_YOUR_SECRET_KEY"
+      }
     }
   }
 }
 ```
-5. Close and re-open Claude and you can now interact with Composer!
+Instructions for getting your API Key can be found [here](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
+
 
 ## Getting your API Key
 
@@ -97,29 +110,6 @@ Get your API key from [Composer](https://app.composer.trade) by following these 
    <div align="center">
      <img src="https://github.com/user-attachments/assets/dd4d2828-6bfd-4db5-9fe0-6a78694f87c6" alt="CleanShot 2025-06-25 at 14 35 15@2x" width="500">
    </div>
-1. Depending on how you installed the Composer MCP server, do the following:
-    1. If you installed via `composer-trade-mcp.dxt`:
-        - Go to Claude > Settings > Extensions > Composer MCP Server > Configure
-        - Add your API Key and Secret
-    1. If you installed via `claude_desktop_config.json`:
-        - Modify your `claude_desktop_config.json` to include your API key and secret:
-```
-{
-  "mcpServers": {
-    "composer": {
-      "command": "uvx",
-      "args": [
-        "composer-trade-mcp"
-      ],
-      "env": {
-        "COMPOSER_API_KEY": "<insert-your-api-key-here>",
-        "COMPOSER_SECRET_KEY": "<insert-your-api-secret-here>"
-      }
-    }
-  }
-}
-```
-6. Quit and re-open Claude to apply your changes.
 
 ## Available tools
 Once your LLM is connected to the Composer MCP Server, it will have access to the following tools:

@@ -68,8 +68,6 @@ Use one of the following links depending on whether you want to use the MCP serv
 
 ## Manual install for other LLM clients
 
-‼️ **NOTE: ChatGPT does not support our authentication method. Also, OpenAI blocks custom MCP servers unless you have the ChatGPT Pro Plan ($200/mo).** :‼️
-
 To install for any other MCP-enabled LLM, you can add the following to your MCP configuration JSON:
 
 ```
@@ -95,6 +93,8 @@ To install for any other MCP-enabled LLM, you can add the following to your MCP 
 }
 ```
 Instructions for getting your API Key can be found [here](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
+
+‼️ **NOTE: ChatGPT does not support custom MCP servers unless you have the Pro Plan ($200/mo). They also do not support our authentication scheme.** ‼️
 
 
 ## Getting your API Key

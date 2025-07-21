@@ -56,13 +56,19 @@ Use the links below to jump to the instructions for your preferred LLM client:
 Use one of the following links depending on whether you want to use the MCP server with or without an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
 
 - Without an API Key
-  - [![Install MCP Server](https://cursor.com/deeplink/mcp-install-light.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=composer&config=eyJjb21tYW5kIjoibnB4IC15IG1jcC1yZW1vdGUgaHR0cHM6Ly9tY3AuY29tcG9zZXIudHJhZGUvbWNwLyJ9)
+  - Copy-paste the following into your browser:
+    ```
+    cursor://anysphere.cursor-deeplink/mcp/install?name=composer&config=eyJjb21tYW5kIjoibnB4IC15IG1jcC1yZW1vdGUgaHR0cHM6Ly9tY3AuY29tcG9zZXIudHJhZGUvbWNwLyJ9
+    ```
 - With an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key) (recommended)
-  - [![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=composer&config=eyJjb21tYW5kIjoibnB4IC15IG1jcC1yZW1vdGUgaHR0cHM6Ly9tY3AuY29tcG9zZXIudHJhZGUvbWNwLyAtLWhlYWRlciB4LWFwaS1rZXktaWQ6JHtDT01QT1NFUl9BUElfS0VZfSAtLWhlYWRlciBBdXRob3JpemF0aW9uOiR7Q09NUE9TRVJfU0VDUkVUX0tFWX0iLCJlbnYiOnsiQ09NUE9TRVJfQVBJX0tFWSI6IlJFUExBQ0VfV0lUSF9ZT1VSX0FQSV9LRVkiLCJDT01QT1NFUl9TRUNSRVRfS0VZIjoiQmVhcmVyIFJFUExBQ0VfRlJPTV9IRVJFX1dJVEhfWU9VUl9TRUNSRVRfS0VZIn19)
+  - Copy-paste the following into your browser:
+    ```
+    cursor://anysphere.cursor-deeplink/mcp/install?name=composer&config=eyJjb21tYW5kIjoibnB4IC15IG1jcC1yZW1vdGUgaHR0cHM6Ly9tY3AuY29tcG9zZXIudHJhZGUvbWNwLyAtLWhlYWRlciB4LWFwaS1rZXktaWQ6JHtDT01QT1NFUl9BUElfS0VZfSAtLWhlYWRlciBBdXRob3JpemF0aW9uOiR7Q09NUE9TRVJfU0VDUkVUX0tFWX0iLCJlbnYiOnsiQ09NUE9TRVJfQVBJX0tFWSI6IlJFUExBQ0VfV0lUSF9ZT1VSX0FQSV9LRVkiLCJDT01QT1NFUl9TRUNSRVRfS0VZIjoiQmVhcmVyIFJFUExBQ0VfRlJPTV9IRVJFX1dJVEhfWU9VUl9TRUNSRVRfS0VZIn19
+    ```
 
 ## Manual install for other LLM clients
 
-‼️ **NOTE: ChatGPT does not support our authentication method. OpenAI also doesn't allow custom MCP servers unless you have the ChatGPT Pro Plan ($200/mo).** :‼️
+‼️ **NOTE: ChatGPT does not support our authentication method. Also, OpenAI blocks custom MCP servers unless you have the ChatGPT Pro Plan ($200/mo).** :‼️
 
 To install for any other MCP-enabled LLM, you can add the following to your MCP configuration JSON:
 

@@ -39,6 +39,7 @@ This section will get you started with creating symphonies and backtesting them.
 Use the links below to jump to the instructions for your preferred LLM client:
 - [Claude Desktop](https://github.com/invest-composer/composer-trade-mcp#quickstart-with-claude-desktop)
 - [Cursor](https://github.com/invest-composer/composer-trade-mcp#quickstart-with-cursor)
+- [n8n](https://github.com/invest-composer/composer-trade-mcp#quickstart-with-n8n)
 - [Other LLMs](https://github.com/invest-composer/composer-trade-mcp#manual-install-for-other-llm-clients)
 
 ## Quickstart with Claude Desktop
@@ -67,6 +68,36 @@ Use one of the following links depending on whether you want to use the MCP serv
     ```
 
 Try asking Cursor something like, "_Find the Composer strategies with the highest alpha._"
+
+## Quickstart with n8n
+
+1. Get your [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key)
+1. Base64 Encode your key and secret separated with `:`
+    - Example: `MY_KEY:MY_SECRET` becomes `TVlfS0VZOk1ZX1NFQ1JFVA==` after Base64 encoding
+1. Make sure your n8n version is at least `1.104.0`
+    -  Learn how to check and update your n8n version [here](https://docs.n8n.io/manage-cloud/update-cloud-version/).
+1. Add "MCP Client Tool" as a tool for your agent
+1. Input the following fields:
+    - Endpoint: `https://mcp.composer.trade/mcp/`
+    - Server Transport: `HTTP Streamable`
+    - Authentication: `Header Auth`
+    - Create a new credential and enter the following in the Connection tab:
+        - Name: `Authorization`
+        - Value: `Basic REPLACE_WITH_BASE64_ENCODED_KEY_AND_SECRET` (Use your Base64 encoded key and secret here)
+1. Select which tools you want to allow your agent to use.
+    - We recommend **excluding** the following tools that can modify your account:
+        - `save_symphony` - Save a symphony to the user's account
+        - `copy_symphony` - Copy an existing symphony to the user's account
+        - `update_saved_symphony` - Update a saved symphony
+        - `invest_in_symphony` - Invest in a symphony for a specific account
+        - `withdraw_from_symphony` - Withdraw money from a symphony for a specific account
+        - `cancel_invest_or_withdraw` - Cancel an invest or withdraw request that has not been processed yet
+        - `skip_automated_rebalance_for_symphony` - Skip automated rebalance for a symphony in a specific account
+        - `go_to_cash_for_symphony` - Immediately sell all assets in a symphony
+        - `liquidate_symphony` - Immediately sell all assets in a symphony (or queue for market open if outside of market hours)
+        - `rebalance_symphony_now` - Rebalance a symphony NOW instead of waiting for the next automated rebalance
+        - `execute_single_trade` - Execute a single order for a specific symbol like you would in a traditional brokerage account
+        - `cancel_single_trade` - Cancel a request for a single trade that has not executed yet
 
 ## Manual install for other LLM clients
 

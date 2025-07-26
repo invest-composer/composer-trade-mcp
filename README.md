@@ -32,6 +32,8 @@
 - **Control your investments** (requires API Key + [Composer subscription](https://www.composer.trade/pricing))
   - Ask AI to analyze your investments and adjust your exposure accordingly!
   - Try asking: "_Research the latest trends and news. Analyze my symphonies and determine whether I should increase / decrease my investments._"
+ 
+For more ideas, check out our collection of [Awesome Prompts](https://github.com/invest-composer/composer-trade-mcp/blob/main/AWESOME_PROMPTS.md)!
 
 # Installation
 This section will get you started with creating symphonies and backtesting them. You don't even need a Composer account to use these features! Note that more advanced features will require an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).

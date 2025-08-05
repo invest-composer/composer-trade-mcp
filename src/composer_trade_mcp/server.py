@@ -924,7 +924,7 @@ def find_highest_alpha_symphonies() -> str:
 @mcp.prompt
 def find_symphonies_with_better_risk_adjusted_return_than_bitcoin() -> str:
     """
-    Find the Composer symphonies with better risk-adjusted return than Bitcoin while keeping risk under half of Bitcoin's over the same period. Filter out symphonies with returns below the S&P 500 over the same time period.
+    Find the Composer symphonies with better risk-adjusted return than Bitcoin.
     """
     return f"""Find the Composer symphonies with better risk-adjusted return than Bitcoin while keeping risk under half of Bitcoin's over the same period.
     Filter out symphonies with returns below the S&P 500 over the same time period."""
@@ -932,7 +932,7 @@ def find_symphonies_with_better_risk_adjusted_return_than_bitcoin() -> str:
 @mcp.prompt
 def compare_live_vs_backtest_performance() -> str:
     """
-    Compare live performance for each symphony against the backtest over the same time period. Return the results as a sorted table starting with the most severe underperformers.
+    Compare live performance for each symphony against the backtest over the same time period. Return the results as a table.
     """
     return f"""Compare my live performance for each symphony against the backtest over the same time period.
     Also compare the live performance against SPY over the same time period.
@@ -948,7 +948,7 @@ def compare_live_vs_backtest_performance() -> str:
 @mcp.prompt
 def explain_symphony(symphony_id_or_url) -> str:
     """
-    Given a symphony ID (like '3W80K6PVgou3IF93Un0N') or a factsheet URL (like 'https://app.composer.trade/symphony/3W80K6PVgou3IF93Un0N/details'), backtest the symphony, inspect the score, and explain the results.
+    Enter a symphony ID (like '3W80K6PVgou3IF93Un0N') or a factsheet URL (like 'https://app.composer.trade/symphony/3W80K6PVgou3IF93Un0N/details') to get an explanation of its performance and how it works.
     """
     return f"""Explain this symphony to me: {symphony_id_or_url}. Describe its investment thesis and explain its statistics to me."""
 

@@ -914,6 +914,44 @@ async def cancel_single_trade(account_uuid: str, order_request_id: str) -> str:
     else:
         return response.json()
 
+@mcp.prompt
+def find_highest_alpha_symphonies() -> str:
+    """
+    Find the Composer symphonies with the highest alpha.
+    """
+    return f"""Find the Composer symphonies with the highest alpha."""
+
+@mcp.prompt
+def find_symphonies_with_better_risk_adjusted_return_than_bitcoin() -> str:
+    """
+    Find the Composer symphonies with better risk-adjusted return than Bitcoin while keeping risk under half of Bitcoin's over the same period. Filter out symphonies with returns below the S&P 500 over the same time period.
+    """
+    return f"""Find the Composer symphonies with better risk-adjusted return than Bitcoin while keeping risk under half of Bitcoin's over the same period.
+    Filter out symphonies with returns below the S&P 500 over the same time period."""
+
+@mcp.prompt
+def compare_live_vs_backtest_performance() -> str:
+    """
+    Compare live performance for each symphony against the backtest over the same time period. Return the results as a sorted table starting with the most severe underperformers.
+    """
+    return f"""Compare my live performance for each symphony against the backtest over the same time period.
+    Also compare the live performance against SPY over the same time period.
+    Use time-weighted returns to compare the performance without the impact of deposits and withdrawals.
+    Return the results as a table with two additional columns:
+    - "Deviation from backtest" = (live time weighted return - backtest return)
+    - "Deviation from SPY" = (live time weighted return - SPY time weighted return)
+    Sort the results by the "Deviation from SPY" column in descending order so the best performers are at the top.
+
+    Notify me about any symphonies that are severely underperforming their backtest and/or SPY.
+    """
+
+@mcp.prompt
+def explain_symphony(symphony_id_or_url) -> str:
+    """
+    Given a symphony ID (like '3W80K6PVgou3IF93Un0N') or a factsheet URL (like 'https://app.composer.trade/symphony/3W80K6PVgou3IF93Un0N/details'), backtest the symphony, inspect the score, and explain the results.
+    """
+    return f"""Explain this symphony to me: {symphony_id_or_url}. Describe its investment thesis and explain its statistics to me."""
+
 @mcp.custom_route("/health", methods=["GET"])
 async def health_check(request: Request) -> JSONResponse:
     return JSONResponse({"status": "healthy"})

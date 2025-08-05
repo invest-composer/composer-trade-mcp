@@ -1,0 +1,14 @@
+permissions: write-all
+
+on:
+  workflow_dispatch:  # Manual trigger
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy Composer Trade MCP
+    uses: ./.github/workflows/deploy.yml
+    with:
+      service_name: composer-trade-mcp

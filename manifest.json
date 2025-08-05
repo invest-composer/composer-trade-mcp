@@ -2,7 +2,7 @@
   "dxt_version": "0.1",
   "name": "composer",
   "display_name": "Composer",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Backtest and automate your trades with LLMs using Composer's AI-powered trading platform",
   "long_description": "The Composer MCP Server enables AI systems to create, backtest, and manage automated trading strategies. It provides tools for strategy creation, historical backtesting, portfolio monitoring, and live trading execution. Composer supports both equities and cryptocurrency trading with advanced features like rebalancing, risk management, and performance analytics.",
   "author": {
@@ -34,16 +34,24 @@
     "llm"
   ],
   "server": {
-    "type": "python",
-    "entry_point": "src/composer_trade_mcp/server.py",
+    "type": "node",
+    "entry_point": "entrypoint.js",
     "mcp_config": {
-      "command": "${HOME}/.local/bin/uvx",
-      "args": [
-        "composer-trade-mcp"
+      "command": "npx",
+      "args": ["-y",
+        "mcp-remote",
+        "https://mcp.composer.trade/mcp/",
+        "--header",
+        "x-api-key-id:${COMPOSER_API_KEY}",
+        "--header",
+        "Authorization:${COMPOSER_SECRET_KEY}",
+        "--header",
+        "x-composer-mcp-environment:${COMPOSER_MCP_ENV}"
       ],
       "env": {
         "COMPOSER_API_KEY": "${user_config.api_key}",
-        "COMPOSER_SECRET_KEY": "${user_config.secret_key}"
+        "COMPOSER_SECRET_KEY": "Bearer ${user_config.secret_key}",
+        "COMPOSER_MCP_ENV": "${user_config.environment}"
       }
     }
   },
@@ -177,6 +185,14 @@
       "description": "Your Composer secret key for authentication. Get this from your Composer account settings.",
       "sensitive": true,
       "required": false
+    },
+    "environment": {
+      "type": "string",
+      "title": "Composer MCP Environment",
+      "description": "For advanced users only. Leave empty unless you know what you are doing.",
+      "sensitive": false,
+      "required": false,
+      "default": ""
     }
   }
 }

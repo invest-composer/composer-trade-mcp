@@ -839,16 +839,36 @@ async def execute_single_trade(
     side: Literal["BUY", "SELL"],
     type: Literal["MARKET", "LIMIT", "STOP", "STOP_LIMIT", "TRAILING_STOP"],
     time_in_force: Literal["GTC", "DAY", "IOC", "FOK", "OPG", "CLS"],
-    symbol: str = Field(description="The symbol of the asset to trade. Note that crypto symbols are formatted like 'CRYPTO::BTC//USD' for Bitcoin."),
-    # Claude was having trouble passing float values, so let's make the field accept strings too.
-    notional: Optional[Union[float, str]] = None,
-    quantity: Optional[Union[float, str]] = None
+    symbol: str = Field(description="The symbol of the asset to trade. Note that crypto symbols are formatted like 'CRYPTO::BTC//USD' for Bitcoin. Options symbols are formatted like 'OPTIONS::AAPL211022C000150000//USD'"),
+    notional: Optional[Union[float, str]] = Field(
+        default=None,
+        description="Required if quantity is not provided."
+    ),
+    quantity: Optional[Union[float, str]] = Field(
+        default=None,
+        description="Required if notional is not provided."
+    ),
+    position_intent: Optional[Literal["BUY_TO_OPEN", "SELL_TO_OPEN", "BUY_TO_CLOSE", "SELL_TO_CLOSE"]] = Field(
+        default=None,
+        description="Required if the symbol is an option contract."
+    ),
+    limit_price: Optional[Union[float, str]] = Field(
+        default=None,
+        description="Limit price for limit/stop_limit orders. Must be positive. Only used for options orders."
+    ),
+    stop_price: Optional[Union[float, str]] = Field(
+        default=None,
+        description="Stop price for stop/stop_limit/trailing_stop orders. Must be positive. Only used for options orders."
+    )
 ) -> Dict:
     """
     Execute a single order for a specific symbol like you would in a traditional brokerage account.
     This is useful for holding assets that you do not want to rebalance.
+    The "direct_tradable_asset_classes" field in the `list_accounts` response will tell you which asset classes this account is allowed to trade.
 
-    One of notional or quantity must be provided.
+    IMPORTANT:
+    - One of notional or quantity must be provided.
+    - Cannot go short on options. Can only sell if closing a position.
     """
     url = f"{get_base_url()}/api/v0.1/trading/accounts/{account_uuid}/order-requests"
 
@@ -870,6 +890,34 @@ async def execute_single_trade(
             return {"error": f"Invalid quantity value: {quantity}"}
     if not notional and not quantity:
         return {"error": "One of notional or quantity must be provided"}
+
+    is_options_order = symbol.startswith("OPTIONS::")
+    if is_options_order:
+        if position_intent is None:
+            return {"error": "Position intent is required for options orders"}
+        if time_in_force not in ["DAY"]:
+            return {"error": "Time in force must be DAY for options orders"}
+
+    if position_intent is not None:
+        payload["position_intent"] = position_intent
+    if limit_price is not None:
+        if not is_options_order:
+            return {"error": "Limit price is only used for options orders"}
+        if limit_price <= 0:
+            return {"error": "Limit price must be positive"}
+        try:
+            payload["limit_price"] = float(limit_price)
+        except (ValueError, TypeError):
+            return {"error": f"Invalid limit price value: {limit_price}"}
+    if stop_price is not None:
+        if not is_options_order:
+            return {"error": "Stop price is only used for options orders"}
+        if stop_price <= 0:
+            return {"error": "Stop price must be positive"}
+        try:
+            payload["stop_price"] = float(stop_price)
+        except (ValueError, TypeError):
+            return {"error": f"Invalid stop price value: {stop_price}"}
 
     # Validate notional/quantity based on side
     if side == "BUY":

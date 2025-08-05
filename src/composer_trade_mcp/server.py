@@ -914,6 +914,108 @@ async def cancel_single_trade(account_uuid: str, order_request_id: str) -> str:
     else:
         return response.json()
 
+@mcp.tool
+async def get_options_chain(underlying_asset_symbol: str, 
+                           strike_price: float = None, 
+                           expiry: str = None, 
+                           contract_type: Literal["CALL", "PUT"] = None,
+                           next_cursor: str = None,
+                           limit: int = 10,
+                           order: Literal["ASC", "DESC"] = None,
+                           sort_by: Literal["symbol", "expiry", "strike_price"] = None) -> Dict:
+    """
+    Get options chain data for a specific underlying asset symbol.
+    
+    Args:
+        underlying_asset_symbol: The underlying asset symbol (supports both "AAPL" and "EQUITIES::AAPL//USD" for equities, but only "CRYPTO::BTC//USD" for crypto)
+        strike_price: Optional strike price filter (double)
+        expiry: Optional expiration date filter in YYYY-MM-DD format
+        contract_type: Optional contract type filter ("CALL" or "PUT")
+        next_cursor: Optional pagination cursor for next page
+        limit: Optional limit for results (max 250, default 10)
+        order: Optional sort order ("ASC" or "DESC")
+        sort_by: Optional sort field ("symbol", "expiry", or "strike_price")
+    
+    Returns options chain data with results array and next_cursor for pagination.
+    """
+    url = f"{get_base_url()}/api/v1/market-data/options/chain"
+    params = {"underlying_asset_symbol": underlying_asset_symbol}
+    
+    if strike_price is not None:
+        params["strike_price"] = strike_price
+    if expiry:
+        params["expiry"] = expiry
+    if contract_type:
+        params["contract_type"] = contract_type
+    if next_cursor:
+        params["next_cursor"] = next_cursor
+    if limit != 10:
+        params["limit"] = min(limit, 250)  # Enforce max limit of 250
+    if order:
+        params["order"] = order
+    if sort_by:
+        params["sort_by"] = sort_by
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=get_required_headers(),
+                params=params
+            )
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error getting options chain: {e}")
+        return {"error": truncate_text(str(e), 1000)}
+
+@mcp.tool
+async def get_options_contract(
+    symbol: str = Field(
+        description="The full options symbol (e.g., 'OPTIONS::AAPL211022C000150000//USD') Must follow pattern: OPTIONS::<ticker><YYMMDD><P|C><strike_padded>//USD",
+        pattern=r'^OPTIONS::[A-Z]{1,5}[1-9]?[0-9]{6}[CP][0-9]{8}//USD$'
+    )
+) -> Dict:
+    """
+    Get detailed information about a specific options contract.
+    
+    Returns detailed contract information including greeks, volume, open interest, current pricing,
+    contract details (type, expiry, strike), bid/ask data, and comprehensive market data.
+    """
+    url = f"{get_base_url()}/api/v1/market-data/options/contract"
+    params = {"symbol": symbol}
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=get_required_headers(),
+                params=params
+            )
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error getting options contract: {e}")
+        return {"error": truncate_text(str(e), 1000)}
+
+@mcp.tool
+async def get_options_calendar(symbol: str) -> Dict:
+    """
+    Get the list of distinct contract expiration dates available for this symbol.
+    """
+    url = f"{get_base_url()}/api/v1/market-data/options/overview"
+    params = {"symbol": symbol}
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=get_required_headers(),
+                params=params
+            )
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error getting options overview: {e}")
+        return {"error": truncate_text(str(e), 1000)}
+
 @mcp.prompt
 def find_highest_alpha_symphonies() -> str:
     """

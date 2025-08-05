@@ -4,7 +4,6 @@ on:
   workflow_dispatch:  # Manual trigger
   push:
     branches:
-      - gcloud  # TODO: remove this once we have a main branch
       - main
 
 jobs:

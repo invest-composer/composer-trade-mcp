@@ -4,7 +4,7 @@ on:
   workflow_dispatch:  # Manual trigger
   push:
     branches:
-      - main
+      - fastmcp-dependency
 
 jobs:
   deploy:

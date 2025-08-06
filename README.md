@@ -170,6 +170,9 @@ Once your LLM is connected to the Composer MCP Server, it will have access to th
 - `get_portfolio_daily_performance` - Get the daily performance for a brokerage account
 - `get_saved_symphony` - Get the definition about an existing symphony given its ID.
 - `get_market_hours` - Get market hours for the next week
+- `get_options_chain` - Get options chain data for a specific underlying asset symbol with filtering and pagination
+- `get_options_contract` - Get detailed information about a specific options contract including greeks, volume, and pricing
+- `get_options_calendar` - Get the list of distinct contract expiration dates available for a symbol
 - `invest_in_symphony` - Invest in a symphony for a specific account
 - `withdraw_from_symphony` - Withdraw money from a symphony for a specific account
 - `cancel_invest_or_withdraw` - Cancel an invest or withdraw request that has not been processed yet

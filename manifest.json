@@ -2,7 +2,7 @@
   "dxt_version": "0.1",
   "name": "composer",
   "display_name": "Composer",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "Backtest and automate your trades with LLMs using Composer's AI-powered trading platform",
   "long_description": "The Composer MCP Server enables AI systems to create, backtest, and manage automated trading strategies. It provides tools for strategy creation, historical backtesting, portfolio monitoring, and live trading execution. Composer supports both equities and cryptocurrency trading with advanced features like rebalancing, risk management, and performance analytics.",
   "author": {
@@ -115,6 +115,18 @@
     {
       "name": "get_market_hours",
       "description": "Get market hours information for the next week"
+    },
+    {
+      "name": "get_options_chain",
+      "description": "Get options chain data for a specific underlying asset symbol with filtering and pagination"
+    },
+    {
+      "name": "get_options_contract",
+      "description": "Get detailed information about a specific options contract including greeks, volume, and pricing"
+    },
+    {
+      "name": "get_options_calendar",
+      "description": "Get the list of distinct contract expiration dates available for a symbol"
     },
     {
       "name": "invest_in_symphony",

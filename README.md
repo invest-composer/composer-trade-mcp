@@ -26,19 +26,17 @@
 - **Find a strategy tailored for you**
   - Provide your criteria to the AI and it will search through our database of 1000+ strategies to find one that suits your needs.
   - Try asking: "_Find me a strategy with better risk-reward characteristics than Bitcoin._"
-- **Monitor performance** (requires [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key))
+- **Monitor performance**
   - View performance statistics for your overall account as well as for individual symphonies.
   - Try asking: "_Identify my best-performing symphonies. Analyze why they are working._"
-- **Control your investments** (requires API Key + [Composer subscription](https://www.composer.trade/pricing))
+- **Control your investments** (requires [Composer subscription](https://www.composer.trade/pricing))
   - Ask AI to analyze your investments and adjust your exposure accordingly!
   - Try asking: "_Research the latest trends and news. Analyze my symphonies and determine whether I should increase / decrease my investments._"
  
 For more ideas, check out our collection of [Awesome Prompts](https://github.com/invest-composer/composer-trade-mcp/blob/main/AWESOME_PROMPTS.md)!
 
 # Installation
-This section will get you started with creating symphonies and backtesting them. You don't even need a Composer account to use these features! Note that more advanced features will require an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
-
-Use the links below to jump to the instructions for your preferred LLM client:
+This section will get you started with creating symphonies and backtesting them. Use the links below to jump to the instructions for your preferred LLM client:
 - [Claude Desktop](https://github.com/invest-composer/composer-trade-mcp#quickstart-with-claude-desktop)
 - [Cursor](https://github.com/invest-composer/composer-trade-mcp#quickstart-with-cursor)
 - [n8n](https://github.com/invest-composer/composer-trade-mcp#quickstart-with-n8n)
@@ -49,25 +47,16 @@ Use the links below to jump to the instructions for your preferred LLM client:
 **To use the Composer MCP, you’ll need the Claude Pro or Max [plan](https://www.anthropic.com/pricing).**
 
 1. Make sure you have [Claude Desktop](https://claude.ai/download) installed.
-1. Download [composer-trade-mcp.dxt](https://storage.googleapis.com/www.investcomposer.com/downloads/composer-trade-mcp.dxt)
-1. Go to Claude > Settings > Extensions then click "Install Extension" and select `composer-trade-mcp.dxt`.
-1. Click "Install"
-    - You can choose to add your [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key) here for more advanced features but it's not necessary for backtesting.
+2. Navigate to **Settings &rarr; Connectors** then click **Add custom connector**
+3. Enter "Composer" in the Name field and `https://ai.composer.trade/mcp` in the Remote MCP server URL field.
+4. Enter your Composer email and password in the login screen that opens.
 1. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Find the Composer strategies with the highest alpha._"
 
 ## Quickstart with Cursor
-Use one of the following links depending on whether you want to use the MCP server with or without an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
-
-- Without an API Key
-  - Copy-paste the following into your browser:
-    ```
-    cursor://anysphere.cursor-deeplink/mcp/install?name=composer&config=eyJjb21tYW5kIjoibnB4IC15IG1jcC1yZW1vdGUgaHR0cHM6Ly9tY3AuY29tcG9zZXIudHJhZGUvbWNwLyJ9
-    ```
-- With an [API Key](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key) (recommended)
-  - Copy-paste the following into your browser:
-    ```
-    cursor://anysphere.cursor-deeplink/mcp/install?name=composer&config=eyJjb21tYW5kIjoibnB4IC15IG1jcC1yZW1vdGUgaHR0cHM6Ly9tY3AuY29tcG9zZXIudHJhZGUvbWNwLyAtLWhlYWRlciB4LWFwaS1rZXktaWQ6JHtDT01QT1NFUl9BUElfS0VZfSAtLWhlYWRlciBBdXRob3JpemF0aW9uOiR7Q09NUE9TRVJfU0VDUkVUX0tFWX0iLCJlbnYiOnsiQ09NUE9TRVJfQVBJX0tFWSI6IlJFUExBQ0VfV0lUSF9ZT1VSX0FQSV9LRVkiLCJDT01QT1NFUl9TRUNSRVRfS0VZIjoiQmVhcmVyIFJFUExBQ0VfRlJPTV9IRVJFX1dJVEhfWU9VUl9TRUNSRVRfS0VZIn19
-    ```
+Copy-paste the following into your browser:
+```
+cursor://anysphere.cursor-deeplink/mcp/install?name=Composer&config=eyJ1cmwiOiJodHRwczovL2FpLmNvbXBvc2VyLnRyYWRlL21jcCJ9
+```
 
 Try asking Cursor something like, "_Find the Composer strategies with the highest alpha._"
 

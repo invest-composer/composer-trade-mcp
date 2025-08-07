@@ -837,7 +837,7 @@ async def preview_rebalance_for_symphony(account_uuid: str, symphony_id: str) ->
 async def execute_single_trade(
     account_uuid: str,
     side: Literal["BUY", "SELL"],
-    type: Literal["MARKET", "LIMIT", "STOP", "STOP_LIMIT", "TRAILING_STOP"],
+    type: Literal["MARKET", "LIMIT"],
     time_in_force: Literal["GTC", "DAY", "IOC", "FOK", "OPG", "CLS"],
     symbol: str = Field(description="The symbol of the asset to trade. Note that crypto symbols are formatted like 'CRYPTO::BTC//USD' for Bitcoin. Options symbols are formatted like 'OPTIONS::AAPL211022C000150000//USD'"),
     notional: Optional[Union[float, str]] = Field(
@@ -854,11 +854,7 @@ async def execute_single_trade(
     ),
     limit_price: Optional[Union[float, str]] = Field(
         default=None,
-        description="Limit price for limit/stop_limit orders. Must be positive. Only used for options orders."
-    ),
-    stop_price: Optional[Union[float, str]] = Field(
-        default=None,
-        description="Stop price for stop/stop_limit/trailing_stop orders. Must be positive. Only used for options orders."
+        description="Limit price for limit orders. Must be positive. Only used for options orders."
     )
 ) -> Dict:
     """
@@ -897,6 +893,9 @@ async def execute_single_trade(
             return {"error": "Position intent is required for options orders"}
         if time_in_force not in ["DAY"]:
             return {"error": "Time in force must be DAY for options orders"}
+    else:
+        if type == "LIMIT":
+            return {"error": "Limit orders are only supported for options orders"}
 
     if position_intent is not None:
         payload["position_intent"] = position_intent
@@ -909,15 +908,6 @@ async def execute_single_trade(
             payload["limit_price"] = float(limit_price)
         except (ValueError, TypeError):
             return {"error": f"Invalid limit price value: {limit_price}"}
-    if stop_price is not None:
-        if not is_options_order:
-            return {"error": "Stop price is only used for options orders"}
-        if stop_price <= 0:
-            return {"error": "Stop price must be positive"}
-        try:
-            payload["stop_price"] = float(stop_price)
-        except (ValueError, TypeError):
-            return {"error": f"Invalid stop price value: {stop_price}"}
 
     # Validate notional/quantity based on side
     if side == "BUY":

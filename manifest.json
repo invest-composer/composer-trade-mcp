@@ -2,7 +2,7 @@
   "dxt_version": "0.1",
   "name": "composer",
   "display_name": "Composer",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "Backtest and automate your trades with LLMs using Composer's AI-powered trading platform",
   "long_description": "The Composer MCP Server enables AI systems to create, backtest, and manage automated trading strategies. It provides tools for strategy creation, historical backtesting, portfolio monitoring, and live trading execution. Composer supports both equities and cryptocurrency trading with advanced features like rebalancing, risk management, and performance analytics.",
   "author": {
@@ -117,6 +117,18 @@
       "description": "Get market hours information for the next week"
     },
     {
+      "name": "get_options_chain",
+      "description": "Get options chain data for a specific underlying asset symbol with filtering and pagination"
+    },
+    {
+      "name": "get_options_contract",
+      "description": "Get detailed information about a specific options contract including greeks, volume, and pricing"
+    },
+    {
+      "name": "get_options_calendar",
+      "description": "Get the list of distinct contract expiration dates available for a symbol"
+    },
+    {
       "name": "invest_in_symphony",
       "description": "Invest in a symphony for a specific account"
     },
@@ -161,7 +173,32 @@
       "description": "Cancel a request for a single trade that has not executed yet"
     }
   ],
-  "prompts": [],
+  "prompts": [
+    {
+      "name": "find_highest_alpha_symphonies",
+      "description": "Find the Composer symphonies with the highest alpha.",
+      "arguments": [],
+      "text": "Find the Composer symphonies with the highest alpha."
+    },
+    {
+      "name": "find_symphonies_with_better_risk_adjusted_return_than_bitcoin",
+      "description": "Find the Composer symphonies with better risk-adjusted return than Bitcoin.",
+      "arguments": [],
+      "text": "Find the Composer symphonies with better risk-adjusted return than Bitcoin while keeping risk under half of Bitcoin's over the same period.\nFilter out symphonies with returns below the S&P 500 over the same time period."
+    },
+    {
+      "name": "compare_live_vs_backtest_performance",
+      "description": "Compare live performance for each symphony against the backtest over the same time period. Return the results as a table.",
+      "arguments": [],
+      "text": "Compare my live performance for each symphony against the backtest over the same time period.\nAlso compare the live performance against SPY over the same time period.\nUse time-weighted returns to compare the performance without the impact of deposits and withdrawals.\nReturn the results as a table with two additional columns:\n- \"Deviation from backtest\" = (live time weighted return - backtest return)\n- \"Deviation from SPY\" = (live time weighted return - SPY time weighted return)\nSort the results by the \"Deviation from SPY\" column in descending order so the best performers are at the top.\n\nNotify me about any symphonies that are severely underperforming their backtest and/or SPY."
+    },
+    {
+      "name": "explain_symphony",
+      "description": "Explain a symphony's performance and how it works.",
+      "arguments": ["symphony_id_or_url"],
+      "text": "Explain this symphony to me: ${arguments.symphony_id_or_url}. Describe its investment thesis and explain its statistics to me."
+    }
+  ],
   "tools_generated": false,
   "prompts_generated": false,
   "compatibility": {

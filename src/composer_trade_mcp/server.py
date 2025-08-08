@@ -837,18 +837,34 @@ async def preview_rebalance_for_symphony(account_uuid: str, symphony_id: str) ->
 async def execute_single_trade(
     account_uuid: str,
     side: Literal["BUY", "SELL"],
-    type: Literal["MARKET", "LIMIT", "STOP", "STOP_LIMIT", "TRAILING_STOP"],
+    type: Literal["MARKET", "LIMIT"],
     time_in_force: Literal["GTC", "DAY", "IOC", "FOK", "OPG", "CLS"],
-    symbol: str = Field(description="The symbol of the asset to trade. Note that crypto symbols are formatted like 'CRYPTO::BTC//USD' for Bitcoin."),
-    # Claude was having trouble passing float values, so let's make the field accept strings too.
-    notional: Optional[Union[float, str]] = None,
-    quantity: Optional[Union[float, str]] = None
+    symbol: str = Field(description="The symbol of the asset to trade. Note that crypto symbols are formatted like 'CRYPTO::BTC//USD' for Bitcoin. Options symbols are formatted like 'OPTIONS::AAPL211022C000150000//USD'"),
+    notional: Optional[Union[float, str]] = Field(
+        default=None,
+        description="Required if quantity is not provided."
+    ),
+    quantity: Optional[Union[float, str]] = Field(
+        default=None,
+        description="Required if notional is not provided."
+    ),
+    position_intent: Optional[Literal["BUY_TO_OPEN", "SELL_TO_OPEN", "BUY_TO_CLOSE", "SELL_TO_CLOSE"]] = Field(
+        default=None,
+        description="Required if the symbol is an option contract."
+    ),
+    limit_price: Optional[Union[float, str]] = Field(
+        default=None,
+        description="Limit price for limit orders. Must be positive. Only used for options orders."
+    )
 ) -> Dict:
     """
     Execute a single order for a specific symbol like you would in a traditional brokerage account.
     This is useful for holding assets that you do not want to rebalance.
+    The "direct_tradable_asset_classes" field in the `list_accounts` response will tell you which asset classes this account is allowed to trade.
 
-    One of notional or quantity must be provided.
+    IMPORTANT:
+    - One of notional or quantity must be provided.
+    - Cannot go short on options. Can only sell if closing a position.
     """
     url = f"{get_base_url()}/api/v0.1/trading/accounts/{account_uuid}/order-requests"
 
@@ -870,6 +886,28 @@ async def execute_single_trade(
             return {"error": f"Invalid quantity value: {quantity}"}
     if not notional and not quantity:
         return {"error": "One of notional or quantity must be provided"}
+
+    is_options_order = symbol.startswith("OPTIONS::")
+    if is_options_order:
+        if position_intent is None:
+            return {"error": "Position intent is required for options orders"}
+        if time_in_force not in ["DAY"]:
+            return {"error": "Time in force must be DAY for options orders"}
+    else:
+        if type == "LIMIT":
+            return {"error": "Limit orders are only supported for options orders"}
+
+    if position_intent is not None:
+        payload["position_intent"] = position_intent
+    if limit_price is not None:
+        if not is_options_order:
+            return {"error": "Limit price is only used for options orders"}
+        if limit_price <= 0:
+            return {"error": "Limit price must be positive"}
+        try:
+            payload["limit_price"] = float(limit_price)
+        except (ValueError, TypeError):
+            return {"error": f"Invalid limit price value: {limit_price}"}
 
     # Validate notional/quantity based on side
     if side == "BUY":
@@ -913,6 +951,108 @@ async def cancel_single_trade(account_uuid: str, order_request_id: str) -> str:
         return "Successfully canceled order"
     else:
         return response.json()
+
+@mcp.tool
+async def get_options_chain(underlying_asset_symbol: str, 
+                           strike_price: float = None, 
+                           expiry: str = None, 
+                           contract_type: Literal["CALL", "PUT"] = None,
+                           next_cursor: str = None,
+                           limit: int = 10,
+                           order: Literal["ASC", "DESC"] = None,
+                           sort_by: Literal["symbol", "expiry", "strike_price"] = None) -> Dict:
+    """
+    Get options chain data for a specific underlying asset symbol.
+    
+    Args:
+        underlying_asset_symbol: The underlying asset symbol (supports both "AAPL" and "EQUITIES::AAPL//USD" for equities, but only "CRYPTO::BTC//USD" for crypto)
+        strike_price: Optional strike price filter (double)
+        expiry: Optional expiration date filter in YYYY-MM-DD format
+        contract_type: Optional contract type filter ("CALL" or "PUT")
+        next_cursor: Optional pagination cursor for next page
+        limit: Optional limit for results (max 250, default 10)
+        order: Optional sort order ("ASC" or "DESC")
+        sort_by: Optional sort field ("symbol", "expiry", or "strike_price")
+    
+    Returns options chain data with results array and next_cursor for pagination.
+    """
+    url = f"{get_base_url()}/api/v1/market-data/options/chain"
+    params = {"underlying_asset_symbol": underlying_asset_symbol}
+    
+    if strike_price is not None:
+        params["strike_price"] = strike_price
+    if expiry:
+        params["expiry"] = expiry
+    if contract_type:
+        params["contract_type"] = contract_type
+    if next_cursor:
+        params["next_cursor"] = next_cursor
+    if limit != 10:
+        params["limit"] = min(limit, 250)  # Enforce max limit of 250
+    if order:
+        params["order"] = order
+    if sort_by:
+        params["sort_by"] = sort_by
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=get_required_headers(),
+                params=params
+            )
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error getting options chain: {e}")
+        return {"error": truncate_text(str(e), 1000)}
+
+@mcp.tool
+async def get_options_contract(
+    symbol: str = Field(
+        description="The full options symbol (e.g., 'OPTIONS::AAPL211022C000150000//USD') Must follow pattern: OPTIONS::<ticker><YYMMDD><P|C><strike_padded>//USD",
+        pattern=r'^OPTIONS::[A-Z]{1,5}[1-9]?[0-9]{6}[CP][0-9]{8}//USD$'
+    )
+) -> Dict:
+    """
+    Get detailed information about a specific options contract.
+    
+    Returns detailed contract information including greeks, volume, open interest, current pricing,
+    contract details (type, expiry, strike), bid/ask data, and comprehensive market data.
+    """
+    url = f"{get_base_url()}/api/v1/market-data/options/contract"
+    params = {"symbol": symbol}
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=get_required_headers(),
+                params=params
+            )
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error getting options contract: {e}")
+        return {"error": truncate_text(str(e), 1000)}
+
+@mcp.tool
+async def get_options_calendar(symbol: str) -> Dict:
+    """
+    Get the list of distinct contract expiration dates available for this symbol.
+    """
+    url = f"{get_base_url()}/api/v1/market-data/options/overview"
+    params = {"symbol": symbol}
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=get_required_headers(),
+                params=params
+            )
+        return response.json()
+    except Exception as e:
+        logger.error(f"Error getting options overview: {e}")
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.prompt
 def find_highest_alpha_symphonies() -> str:

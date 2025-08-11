@@ -42,15 +42,17 @@ This section will get you started with creating symphonies and backtesting them.
 - [n8n](https://github.com/invest-composer/composer-trade-mcp#quickstart-with-n8n)
 - [Other LLMs](https://github.com/invest-composer/composer-trade-mcp#manual-install-for-other-llm-clients)
 
-## Quickstart with Claude Desktop
+## Quickstart with Claude Desktop and Claude iOS
 
 **To use the Composer MCP, you’ll need the Claude Pro or Max [plan](https://www.anthropic.com/pricing).**
 
 1. Make sure you have [Claude Desktop](https://claude.ai/download) installed.
-2. Navigate to **Settings &rarr; Connectors** then click **Add custom connector**
+2. From Claude Desktop, navigate to **Settings &rarr; Connectors** then click **Add custom connector**
 3. Enter "Composer" in the Name field and `https://ai.composer.trade/mcp` in the Remote MCP server URL field.
 4. Enter your Composer email and password in the login screen that opens.
 1. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Find the Composer strategies with the highest alpha._"
+
+Once you've followed the above steps, the Composer MCP server will automatically be accessible in the Claude iOS app.
 
 ## Quickstart with Cursor
 Copy-paste the following into your browser:
@@ -176,5 +178,6 @@ Logs when running with Claude Desktop can be found at:
 
 ---
 _Please review the [API & MCP Server Disclosure](https://storage.googleapis.com/www.investcomposer.com/docs/COM%20sh%20-%20API%20%26%20MCP%20Server%20Disclosure.pdf) before using the API_
+
 
 

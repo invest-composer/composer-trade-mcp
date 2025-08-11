@@ -98,20 +98,7 @@ To install for any other MCP-enabled LLM, you can add the following to your MCP 
 {
   "mcpServers": {
     "composer": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://mcp.composer.trade/mcp/",
-        "--header",
-        "x-api-key-id:${COMPOSER_API_KEY}",
-        "--header",
-        "Authorization:${COMPOSER_SECRET_KEY}"
-      ],
-      "env": {
-        "COMPOSER_API_KEY": "REPLACE_WITH_YOUR_API_KEY",
-        "COMPOSER_SECRET_KEY": "Bearer REPLACE_FROM_HERE_WITH_YOUR_SECRET_KEY"
-      }
+      "url": "https://ai.composer.trade/mcp"
     }
   }
 }
@@ -190,3 +177,4 @@ Logs when running with Claude Desktop can be found at:
 
 ---
 _Please review the [API & MCP Server Disclosure](https://storage.googleapis.com/www.investcomposer.com/docs/COM%20sh%20-%20API%20%26%20MCP%20Server%20Disclosure.pdf) before using the API_
+

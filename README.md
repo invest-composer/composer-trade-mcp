@@ -46,6 +46,11 @@ This section will get you started with creating symphonies and backtesting them.
 
 **To use the Composer MCP, you’ll need the Claude Pro or Max [plan](https://www.anthropic.com/pricing).**
 
+
+https://github.com/user-attachments/assets/f560c127-4c87-4932-b515-6cad962c8ddc
+
+
+
 1. Make sure you have [Claude Desktop](https://claude.ai/download) installed.
 2. From Claude Desktop, navigate to **Settings &rarr; Connectors** then click **Add custom connector**
 3. Enter "Composer" in the Name field and `https://ai.composer.trade/mcp` in the Remote MCP server URL field.
@@ -178,6 +183,7 @@ Logs when running with Claude Desktop can be found at:
 
 ---
 _Please review the [API & MCP Server Disclosure](https://storage.googleapis.com/www.investcomposer.com/docs/COM%20sh%20-%20API%20%26%20MCP%20Server%20Disclosure.pdf) before using the API_
+
 
 
 

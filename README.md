@@ -103,9 +103,8 @@ To install for any other MCP-enabled LLM, you can add the following to your MCP 
   }
 }
 ```
-Instructions for getting your API Key can be found [here](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#getting-your-api-key).
 
-‼️ **NOTE: ChatGPT does not support custom MCP servers unless you have the Pro Plan ($200/mo). They also do not support our authentication scheme.** ‼️
+‼️ **NOTE: ChatGPT does not support custom MCP servers unless you have the Pro Plan ($200/mo). They also do not support MCP servers with more than two tools.** ‼️
 
 
 ## Getting your API Key
@@ -177,4 +176,5 @@ Logs when running with Claude Desktop can be found at:
 
 ---
 _Please review the [API & MCP Server Disclosure](https://storage.googleapis.com/www.investcomposer.com/docs/COM%20sh%20-%20API%20%26%20MCP%20Server%20Disclosure.pdf) before using the API_
+
 

@@ -37,7 +37,8 @@ For more ideas, check out our collection of [Awesome Prompts](https://github.com
 
 # Installation
 This section will get you started with creating symphonies and backtesting them. Use the links below to jump to the instructions for your preferred LLM client:
-- [Claude Desktop](https://github.com/invest-composer/composer-trade-mcp#quickstart-with-claude-desktop)
+- [Claude Desktop + iOS](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#quickstart-with-claude-desktop-and-claude-ios)
+- [Claude Code](https://github.com/invest-composer/composer-trade-mcp?tab=readme-ov-file#quickstart-with-claude-code)
 - [Cursor](https://github.com/invest-composer/composer-trade-mcp#quickstart-with-cursor)
 - [n8n](https://github.com/invest-composer/composer-trade-mcp#quickstart-with-n8n)
 - [Other LLMs](https://github.com/invest-composer/composer-trade-mcp#manual-install-for-other-llm-clients)
@@ -58,6 +59,12 @@ https://github.com/user-attachments/assets/f560c127-4c87-4932-b515-6cad962c8ddc
 1. That's it. Your MCP client can now interact with Composer! Try asking Claude something like, "_Find the Composer strategies with the highest alpha._"
 
 Once you've followed the above steps, the Composer MCP server will automatically be accessible in the Claude iOS app.
+
+## Quickstart with Claude Code
+Run the following command from your terminal:
+```
+claude mcp add --transport http composer https://ai.composer.trade/mcp
+```
 
 ## Quickstart with Cursor
 Copy-paste the following into your browser:
@@ -183,6 +190,7 @@ Logs when running with Claude Desktop can be found at:
 
 ---
 _Please review the [API & MCP Server Disclosure](https://storage.googleapis.com/www.investcomposer.com/docs/COM%20sh%20-%20API%20%26%20MCP%20Server%20Disclosure.pdf) before using the API_
+
 
 
 

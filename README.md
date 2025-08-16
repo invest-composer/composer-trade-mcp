@@ -24,7 +24,7 @@
   - Our Backtesting API provides a fast feedback loop for AI to iterate and validate its hypotheses.
   - Try asking: "_Compare the strategy's performance against the S&P 500. Plot the results._"
 - **Find a strategy tailored for you**
-  - Provide your criteria to the AI and it will search through our database of 1000+ strategies to find one that suits your needs.
+  - Provide your criteria to the AI and it will search through our [database](https://www.composer.trade/symphony) of 1000+ strategies to find one that suits your needs.
   - Try asking: "_Find me a strategy with better risk-reward characteristics than Bitcoin._"
 - **Monitor performance**
   - View performance statistics for your overall account as well as for individual symphonies.
@@ -190,6 +190,7 @@ Logs when running with Claude Desktop can be found at:
 
 ---
 _Please review the [API & MCP Server Disclosure](https://storage.googleapis.com/www.investcomposer.com/docs/COM%20sh%20-%20API%20%26%20MCP%20Server%20Disclosure.pdf) before using the API_
+
 
 
 

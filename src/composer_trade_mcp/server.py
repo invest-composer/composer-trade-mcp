@@ -79,7 +79,7 @@ async def backtest_symphony_by_id(symphony_id: str,
         else:
             return output
     except Exception as e:
-        return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def backtest_symphony(symphony_score: SymphonyScore,
@@ -133,7 +133,7 @@ async def backtest_symphony(symphony_score: SymphonyScore,
         else:
             return output
     except Exception as e:
-        return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 def create_symphony(symphony_score: SymphonyScore) -> Dict:
@@ -310,7 +310,7 @@ def create_symphony(symphony_score: SymphonyScore) -> Dict:
 async def search_symphonies(where: List = [["and", [">", "oos_num_backtest_days", 180],
                                       ["<", "oos_max_drawdown", "oos_btcusd_max_drawdown"]]],
                       order_by: List = [["oos_cumulative_return", "desc"]],
-                      offset: int = 0) -> List:
+                      offset: int = 0) -> Union[List, Dict]:
     """
     You have access to a database of Composer symphonies with the following statistics:
     - calmar_ratio
@@ -345,17 +345,19 @@ async def search_symphonies(where: List = [["and", [">", "oos_num_backtest_days"
     Use offset to paginate through the results. The limit is set to 5.
 
     Example:
-    - Find symphonies with more than 1 year of OOS backtest data
-      and annualized return greater than SPY's in both OOS and training periods
-      and max drawdown lower than BTC's in both OOS and training periods
+    - Find symphonies with more than 6 months of OOS backtest data
+      and annualized return at least 50% greater than SPY's in both OOS and training periods
+      and max drawdown lower than 50% of BTC's in both OOS and training periods
       and oos annualized return greater than 20% (i.e., 0.2)
       Sort by OOS cumulative return descending:
+      # Note there are no quotes around the numbers in the where clause.
       where: ["and",
                 [">", "oos_num_backtest_days", 180],
-                [">", "oos_annualized_rate_of_return", "oos_spy_annualized_rate_of_return"],
-                [">", "train_annualized_rate_of_return", "train_spy_annualized_rate_of_return"],
-                ["<", "oos_max_drawdown", "oos_btcusd_max_drawdown"],
-                ["<", "train_max_drawdown", "train_btcusd_max_drawdown"]]
+                [">", "oos_annualized_rate_of_return", ["*", 1.5, "oos_spy_annualized_rate_of_return"]],
+                [">", "train_annualized_rate_of_return", ["*", 1.5, "train_spy_annualized_rate_of_return"]],
+                ["<", "oos_max_drawdown", ["*", 0.5, "oos_btcusd_max_drawdown"]],
+                ["<", "train_max_drawdown", ["*", 0.5, "train_btcusd_max_drawdown"]],
+                [">", "oos_annualized_rate_of_return", 0.2]]
       order_by: [["oos_cumulative_return", "desc"]]
 
     Tips for finding good symphonies:
@@ -390,7 +392,7 @@ async def search_symphonies(where: List = [["and", [">", "oos_num_backtest_days"
                 del item["symphony_sid"]
         return results
     except Exception as e:
-        return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
+        return {"error": truncate_text(str(e), 1000)}
 
 # Could be a resource but Claude Desktop doesn't autonomously call resources yet.
 @mcp.tool
@@ -401,32 +403,52 @@ async def list_accounts() -> List[AccountResponse]:
     This tool returns a list of accounts and their UUIDs.
     If this returns an empty list, the user needs to complete their Composer onboarding on app.composer.trade.
     """
-    url = f"{get_base_url()}/api/v0.1/accounts/list"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            url,
-            headers=get_required_headers(),
-        )
     try:
+        url = f"{get_base_url()}/api/v0.1/accounts/list"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=get_required_headers(),
+            )
         return response.json()["accounts"]
     except Exception as e:
-        return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
-async def get_account_holdings(account_uuid: str) -> List[AccountHoldingResponse]:
+async def get_account_holdings(account_uuid: str) -> Dict:
     """
     Get the holdings of a brokerage account.
+    Stocks and crypto can be held as individual (aka "direct") positions and/or in one or more automated strategies (aka "symphonies").
+    The sum of all direct positions and symphonies holdings for the asset is in the "overall_portfolio" field.
+    The "direct" and "symphony" fields are useful for detailed breakdowns of where the asset is held.
+    The "allocation" field is the percentage of the account's overall portfolio that is allocated to the asset, represented as a float between 0 and 1.
+    The "amount" field is the total quantity of shares of the asset in the account.
+    The "value" field is the total market value of the asset in the account.
     """
-    url = f"{get_base_url()}/api/v0.1/accounts/{account_uuid}/holdings"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            url,
-            headers=get_required_headers(),
-        )
-    return response.json()
+    try:
+        url = f"{get_base_url()}/api/v0.1/portfolio/accounts/{account_uuid}/holding-stats"
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(
+                url,
+                headers=get_required_headers(),
+            )
+        data = response.json()
+        holdings = data.get("holdings", [])
+        for holding in holdings:
+            direct = holding.get("direct", {}) or {}
+            symphony = holding.get("symphony", {}) or {}
+            holding["overall_portfolio"] = {
+                "allocation": (direct.get("allocation") or 0) + (symphony.get("allocation") or 0),
+                "amount": (direct.get("amount") or 0) + (symphony.get("amount") or 0),
+                "value": (direct.get("value") or 0) + (symphony.get("value") or 0),
+            }
+        return data
+    except Exception as e:
+        logger.error(f"Error getting account holdings for {account_uuid}: {e!r}", exc_info=True)
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
-async def get_aggregate_portfolio_stats(account_uuid: str) -> PortfolioStatsResponse:
+async def get_aggregate_portfolio_stats(account_uuid: str) -> PortfolioStatsResponse | Dict:
     """
     Get the aggregate portfolio statistics of a brokerage account.
 
@@ -441,16 +463,19 @@ async def get_aggregate_portfolio_stats(account_uuid: str) -> PortfolioStatsResp
     - todays_dollar_change: float. The dollar difference between the portfolio value today and yesterday. IMPORTANT: This will include the effect of depositing/withdrawing funds. EX: If you had $1000 yesterday and deposited $100 today, todays_dollar_change will be $100, holding the share value constant.
     - todays_percent_change: float. The percent change of the portfolio today. Calculated as todays_dollar_change / portfolio_value.
     """
-    url = f"{get_base_url()}/api/v0.1/portfolio/accounts/{account_uuid}/total-stats"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            url,
-            headers=get_required_headers(),
-        )
-    data = response.json()
-    if 'time_weighted_return' in data:
-        del data['time_weighted_return']
-    return data
+    try:
+        url = f"{get_base_url()}/api/v0.1/portfolio/accounts/{account_uuid}/total-stats"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=get_required_headers(),
+            )
+        data = response.json()
+        if 'time_weighted_return' in data:
+            del data['time_weighted_return']
+        return data
+    except Exception as e:
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def get_aggregate_symphony_stats(account_uuid: str) -> Dict:
@@ -460,13 +485,16 @@ async def get_aggregate_symphony_stats(account_uuid: str) -> Dict:
 
     "deposit_adjusted_value" refers to the time-weighted value of the symphony.
     """
-    url = f"{get_base_url()}/api/v0.1/portfolio/accounts/{account_uuid}/symphony-stats-meta"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            url,
-            headers=get_required_headers(),
-        )
-    return response.json()
+    try:
+        url = f"{get_base_url()}/api/v0.1/portfolio/accounts/{account_uuid}/symphony-stats-meta"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=get_required_headers(),
+            )
+        return response.json()
+    except Exception as e:
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def get_symphony_daily_performance(account_uuid: str, symphony_id: str) -> Dict:
@@ -477,16 +505,19 @@ async def get_symphony_daily_performance(account_uuid: str, symphony_id: str) ->
     - series: List[float]. The total value of the symphony on the given date.
     - deposit_adjusted_series: List[float]. The value of the symphony on the given date, adjusted for deposits and withdrawals. (AKA daily time-weighted value)
     """
-    url = f"{get_base_url()}/api/v0.1/portfolio/accounts/{account_uuid}/symphonies/{symphony_id}"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            url,
-            headers=get_required_headers(),
-        )
-    data = response.json()
-    data['dates'] = [epoch_ms_to_date(d) for d in data['epoch_ms']]
-    del data['epoch_ms']
-    return data
+    try:
+        url = f"{get_base_url()}/api/v0.1/portfolio/accounts/{account_uuid}/symphonies/{symphony_id}"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=get_required_headers(),
+            )
+        data = response.json()
+        data['dates'] = [epoch_ms_to_date(d) for d in data['epoch_ms']]
+        del data['epoch_ms']
+        return data
+    except Exception as e:
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def get_portfolio_daily_performance(account_uuid: str) -> Dict:
@@ -497,16 +528,19 @@ async def get_portfolio_daily_performance(account_uuid: str) -> Dict:
     - dates: List[str]. The dates for which performance is available.
     - series: List[float]. The total value of the portfolio on the given date.
     """
-    url = f"{get_base_url()}/api/v0.1/portfolio/accounts/{account_uuid}/portfolio-history"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            url,
-            headers=get_required_headers(),
-        )
-    data = response.json()
-    data['dates'] = [epoch_ms_to_date(d) for d in data['epoch_ms']]
-    del data['epoch_ms']
-    return data
+    try:
+        url = f"{get_base_url()}/api/v0.1/portfolio/accounts/{account_uuid}/portfolio-history"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=get_required_headers(),
+            )
+        data = response.json()
+        data['dates'] = [epoch_ms_to_date(d) for d in data['epoch_ms']]
+        del data['epoch_ms']
+        return data
+    except Exception as e:
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def save_symphony(
@@ -540,7 +574,7 @@ async def save_symphony(
         try:
             return response.json()
         except Exception as e:
-            return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
+            return {"error": truncate_text(str(e), 1000)}
     except Exception as e:
         payload_without_symphony = {k: v for k, v in payload.items() if k != "symphony"}
         return {"error": truncate_text(str(e), 1000), "payload": payload_without_symphony}
@@ -563,7 +597,7 @@ async def copy_symphony(
         try:
             return response.json()
         except Exception as e:
-            return {"error": truncate_text(str(e), 1000), "response": truncate_text(response.text, 1000)}
+            return {"error": truncate_text(str(e), 1000)}
     except Exception as e:
         return {"error": truncate_text(str(e), 1000), "symphony_id": symphony_id}
 
@@ -608,13 +642,16 @@ async def get_saved_symphony(symphony_id: str) -> Dict:
     Get a saved symphony.
     Useful when you are given a URL like "https://app.composer.trade/symphony/{<symphony_id>}/details"
     """
-    url = f"{get_base_url()}/api/v0.1/symphonies/{symphony_id}/score"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            url,
-            headers=get_optional_headers(),
-        )
-    return response.json()
+    try:
+        url = f"{get_base_url()}/api/v0.1/symphonies/{symphony_id}/score"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=get_optional_headers(),
+            )
+        return response.json()
+    except Exception as e:
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def get_market_hours() -> Dict:
@@ -691,7 +728,7 @@ async def withdraw_from_symphony(account_uuid: str, symphony_id: str, amount: fl
         return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
-async def cancel_invest_or_withdraw(account_uuid: str, deploy_id: str) -> str:
+async def cancel_invest_or_withdraw(account_uuid: str, deploy_id: str) -> Dict:
     """
     Cancel an invest or withdraw request that has not been processed yet.
 
@@ -699,19 +736,22 @@ async def cancel_invest_or_withdraw(account_uuid: str, deploy_id: str) -> str:
     during the trading period. Only requests with status QUEUED can be canceled.
     """
     url = f"{get_base_url()}/api/v0.1/deploy/accounts/{account_uuid}/deploys/{deploy_id}"
-    async with httpx.AsyncClient() as client:
-        response = await client.delete(
-            url,
-            headers=get_required_headers()
-        )
-    if response.status_code == 204:
-        return "Successfully canceled invest or withdraw request"
-    else:
-        return response.json()
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.delete(
+                url,
+                headers=get_required_headers()
+            )
+        if response.status_code == 204:
+            return {"message": "Successfully canceled invest or withdraw request"}
+        else:
+            return response.json()
+    except Exception as e:
+        return {"error": truncate_text(str(e), 1000)}
 
 
 @mcp.tool
-async def skip_automated_rebalance_for_symphony(account_uuid: str, symphony_id: str, skip: bool = True) -> str:
+async def skip_automated_rebalance_for_symphony(account_uuid: str, symphony_id: str, skip: bool = True) -> Dict:
     """
     Skip automated rebalance for a symphony in a specific account.
 
@@ -719,16 +759,19 @@ async def skip_automated_rebalance_for_symphony(account_uuid: str, symphony_id: 
     This is useful when you want to manually control the rebalancing process.
     """
     url = f"{get_base_url()}/api/v0.1/deploy/accounts/{account_uuid}/symphonies/{symphony_id}/skip-automated-rebalance"
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url,
-            headers=get_required_headers(),
-            json={"skip": skip}
-        )
-    if response.status_code == 204:
-        return "Successfully skipped next automated rebalance"
-    else:
-        return response.json()
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
+                headers=get_required_headers(),
+                json={"skip": skip}
+            )
+        if response.status_code == 204:
+            return {"message": "Successfully skipped next automated rebalance"}
+        else:
+            return response.json()
+    except Exception as e:
+        return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
 async def go_to_cash_for_symphony(account_uuid: str, symphony_id: str) -> Dict:
@@ -799,7 +842,7 @@ async def preview_rebalance_for_user() -> List:
     """
     url = f"{get_base_url()}/api/v0.1/dry-run"
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(
                 url,
             headers=get_required_headers(),
@@ -822,12 +865,12 @@ async def preview_rebalance_for_symphony(account_uuid: str, symphony_id: str) ->
     """
     url = f"{get_base_url()}/api/v0.1/dry-run/trade-preview/{symphony_id}"
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(
                 url,
             headers=get_required_headers(),
-            json={"broker_account_uuid": account_uuid}
-        )
+                json={"broker_account_uuid": account_uuid}
+            )
         return response.json()
     except Exception as e:
         logger.error(f"Error previewing rebalance for symphony: {e}")
@@ -874,52 +917,56 @@ async def execute_single_trade(
         "time_in_force": time_in_force,
     }
 
+    error_message = None
     if notional is not None:
         try:
             payload["notional"] = float(notional)
         except (ValueError, TypeError):
-            return {"error": f"Invalid notional value: {notional}"}
+            error_message = f"Invalid notional value: {notional}"
     if quantity is not None:
         try:
             payload["quantity"] = float(quantity)
         except (ValueError, TypeError):
-            return {"error": f"Invalid quantity value: {quantity}"}
+            error_message = f"Invalid quantity value: {quantity}"
     if not notional and not quantity:
-        return {"error": "One of notional or quantity must be provided"}
+        error_message = "One of notional or quantity must be provided"
 
     is_options_order = symbol.startswith("OPTIONS::")
     if is_options_order:
         if position_intent is None:
-            return {"error": "Position intent is required for options orders"}
+            error_message = "Position intent is required for options orders"
         if time_in_force not in ["DAY"]:
-            return {"error": "Time in force must be DAY for options orders"}
+            error_message = "Time in force must be DAY for options orders"
     else:
         if type == "LIMIT":
-            return {"error": "Limit orders are only supported for options orders"}
+            error_message = "Limit orders are only supported for options orders"
 
     if position_intent is not None:
         payload["position_intent"] = position_intent
     if limit_price is not None:
         if not is_options_order:
-            return {"error": "Limit price is only used for options orders"}
+            error_message = "Limit price is only used for options orders"
         if limit_price <= 0:
-            return {"error": "Limit price must be positive"}
+            error_message = "Limit price must be positive"
         try:
             payload["limit_price"] = float(limit_price)
         except (ValueError, TypeError):
-            return {"error": f"Invalid limit price value: {limit_price}"}
+            error_message = f"Invalid limit price value: {limit_price}"
 
     # Validate notional/quantity based on side
     if side == "BUY":
         if notional is not None and float(notional) <= 0:
-            return {"error": "Notional must be positive for BUY orders"}
+            error_message = "Notional must be positive for BUY orders"
         if quantity is not None and float(quantity) <= 0:
-            return {"error": "Quantity must be positive for BUY orders"}
+            error_message = "Quantity must be positive for BUY orders"
     elif side == "SELL":
         if notional is not None and float(notional) >= 0:
-            return {"error": "Notional must be negative for SELL orders"}
+            error_message = "Notional must be negative for SELL orders"
         if quantity is not None and float(quantity) >= 0:
-            return {"error": "Quantity must be negative for SELL orders"}
+            error_message = "Quantity must be negative for SELL orders"
+
+    if error_message:
+        return {"error": error_message}
 
     try:
         async with httpx.AsyncClient() as client:
@@ -934,7 +981,7 @@ async def execute_single_trade(
         return {"error": truncate_text(str(e), 1000)}
 
 @mcp.tool
-async def cancel_single_trade(account_uuid: str, order_request_id: str) -> str:
+async def cancel_single_trade(account_uuid: str, order_request_id: str) -> Dict:
     """
     Cancel a request for a single trade that has not executed yet.
 
@@ -948,7 +995,7 @@ async def cancel_single_trade(account_uuid: str, order_request_id: str) -> str:
         headers=get_required_headers()
     )
     if response.status_code == 204:
-        return "Successfully canceled order"
+        return {"status": "Successfully canceled order"}
     else:
         return response.json()
 
@@ -1054,20 +1101,7 @@ async def get_options_calendar(symbol: str) -> Dict:
         logger.error(f"Error getting options overview: {e}")
         return {"error": truncate_text(str(e), 1000)}
 
-@mcp.prompt
-def find_highest_alpha_symphonies() -> str:
-    """
-    Find the Composer symphonies with the highest alpha.
-    """
-    return f"""Find the Composer symphonies with the highest alpha."""
 
-@mcp.prompt
-def find_symphonies_with_better_risk_adjusted_return_than_bitcoin() -> str:
-    """
-    Find the Composer symphonies with better risk-adjusted return than Bitcoin.
-    """
-    return f"""Find the Composer symphonies with better risk-adjusted return than Bitcoin while keeping risk under half of Bitcoin's over the same period.
-    Filter out symphonies with returns below the S&P 500 over the same time period."""
 
 @mcp.prompt
 def compare_live_vs_backtest_performance() -> str:
@@ -1075,14 +1109,24 @@ def compare_live_vs_backtest_performance() -> str:
     Compare live performance for each symphony against the backtest over the same time period. Return the results as a table.
     """
     return f"""Compare my live performance for each symphony against the backtest over the same time period.
-    Also compare the live performance against SPY over the same time period.
+    Also compare the live performance against SPY over the same time period (the backtest should already return SPY's performance in the `benchmarks` field).
     Use time-weighted returns to compare the performance without the impact of deposits and withdrawals.
-    Return the results as a table with two additional columns:
+    Return the results as a simple markdown table with two additional columns:
     - "Deviation from backtest" = (live time weighted return - backtest return)
     - "Deviation from SPY" = (live time weighted return - SPY time weighted return)
     Sort the results by the "Deviation from SPY" column in descending order so the best performers are at the top.
 
     Notify me about any symphonies that are severely underperforming their backtest and/or SPY.
+
+    Relevant Composer tools:
+    - list_accounts
+    - get_aggregate_symphony_stats
+    - backtest_symphony_by_id (call this for each symphony returned by `get_aggregate_symphony_stats`)
+
+    Tips:
+    - Avoid using your "analyze" tool because it is buggy.
+    - Note that some symphonies contain the | (pipe) character in their name, which causes issues with markdown tables.
+      Since different clients use different markdown renderers, the simplest solution is to replace all | with -.
     """
 
 @mcp.prompt

@@ -471,8 +471,6 @@ async def get_aggregate_portfolio_stats(account_uuid: str) -> PortfolioStatsResp
                 headers=get_required_headers(),
             )
         data = response.json()
-        if 'time_weighted_return' in data:
-            del data['time_weighted_return']
         return data
     except Exception as e:
         return {"error": truncate_text(str(e), 1000)}

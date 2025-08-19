@@ -112,6 +112,52 @@ class Empty(BaseNode):
     step: Literal["empty"]
 
 
+# Define If-related classes first to avoid forward reference issues
+class IfChildTrue(BaseNode):
+    step: Literal["if-child"]
+    is_else_condition: Literal[False] = Field(False, validation_alias="is-else-condition?", serialization_alias="is-else-condition?")
+    children: List[Union["Asset", "Filter", "If", "Group", "WeightCashEqual", 
+                        "WeightCashSpecified", "WeightInverseVol", "Empty"]] = Field(default_factory=list)
+    # These fields are only required for the true condition (first if-child)
+    comparator: Literal["gt", "gte", "eq", "lt", "lte"]
+    lhs_fn: Function = Field(alias='lhs-fn')
+    lhs_val: str = Field(alias='lhs-val')
+    rhs_val: Optional[Union[str, float]] = Field(alias='rhs-val')  # Can be string (ticker) or float
+    rhs_fixed_value: bool = Field(validation_alias='rhs-fixed-value?', serialization_alias='rhs-fixed-value?')
+    rhs_fn: Function = Field(alias='rhs-fn')
+    lhs_window_days: Optional[int] = Field(alias='lhs-window-days')
+    rhs_window_days: Optional[int] = Field(alias='rhs-window-days')
+    lhs_fn_params: WindowParams = Field(alias='lhs-fn-params')
+    rhs_fn_params: WindowParams = Field(alias='rhs-fn-params')
+
+
+class IfChildFalse(BaseNode):
+    step: Literal["if-child"]
+    is_else_condition: Literal[True] = Field(True, validation_alias="is-else-condition?", serialization_alias="is-else-condition?")
+    children: List[Union["Asset", "Filter", "If", "Group", "WeightCashEqual", 
+                        "WeightCashSpecified", "WeightInverseVol", "Empty"]] = Field(default_factory=list)
+
+
+class If(BaseNode):
+    step: Literal["if"]
+    children: List[Union[IfChildTrue, IfChildFalse]] = Field(default_factory=list)
+    
+    @field_validator('children')
+    @classmethod
+    def validate_if_children(cls, v):
+        if len(v) != 2:
+            raise ValueError('If node must have exactly 2 children')
+        
+        # Check that we have one true condition and one false condition
+        true_conditions = [child for child in v if not child.is_else_condition]
+        false_conditions = [child for child in v if child.is_else_condition]
+        
+        if len(true_conditions) != 1 or len(false_conditions) != 1:
+            raise ValueError('If node must have exactly one true condition child and one false condition child')
+        
+        return v
+
+
 class Filter(BaseNode):
     step: Literal["filter"]
     sort_by_window_days: Optional[int] = Field(alias='sort-by-window-days')
@@ -128,35 +174,6 @@ class WeightInverseVol(BaseNode):
     window_days: Optional[int] = Field(alias='window-days')
     children: List[Union["Asset", "Filter", "If", "Group", "WeightCashEqual", 
                         "WeightCashSpecified", "WeightInverseVol", "Empty"]] = Field(default_factory=list)
-
-
-class IfChildTrue(BaseNode):
-    step: Literal["if-child"]
-    is_else_condition: Literal[False] = Field(False, validation_alias="is-else-condition?", serialization_alias="is-else-condition?")
-    children: List[Union["Asset", "Filter", "If", "Group", "WeightCashEqual", 
-                        "WeightCashSpecified", "WeightInverseVol", "Empty"]] = Field(default_factory=list)
-    comparator: Optional[Literal["gt", "gte", "eq", "lt", "lte"]]
-    lhs_fn: Optional[Function] = Field(alias='lhs-fn')
-    lhs_val: Optional[str] = Field(alias='lhs-val')
-    rhs_val: Optional[float] = Field(alias='rhs-val')
-    rhs_fixed_value: Optional[bool] = Field(validation_alias='rhs-fixed-value?', serialization_alias='rhs-fixed-value?')
-    rhs_fn: Optional[Function] = Field(alias='rhs-fn')
-    lhs_window_days: Optional[int] = Field(alias='lhs-window-days')
-    rhs_window_days: Optional[int] = Field(alias='rhs-window-days')
-    lhs_fn_params: Optional[WindowParams] = Field(alias='lhs-fn-params')
-    rhs_fn_params: Optional[WindowParams] = Field(alias='rhs-fn-params')
-
-
-class IfChildFalse(BaseNode):
-    step: Literal["if-child"]
-    is_else_condition: Literal[True] = Field(True, validation_alias="is-else-condition?", serialization_alias="is-else-condition?")
-    children: List[Union["Asset", "Filter", "If", "Group", "WeightCashEqual", 
-                        "WeightCashSpecified", "WeightInverseVol", "Empty"]] = Field(default_factory=list)
-
-
-class If(BaseNode):
-    step: Literal["if"]
-    children: Tuple[IfChildTrue, IfChildFalse]
 
 
 class Group(BaseNode):
@@ -228,10 +245,11 @@ class Root(BaseNode):
 
 
 # Update forward references
-Filter.model_rebuild()
-WeightInverseVol.model_rebuild()
 IfChildTrue.model_rebuild()
 IfChildFalse.model_rebuild()
+If.model_rebuild()
+Filter.model_rebuild()
+WeightInverseVol.model_rebuild()
 Group.model_rebuild()
 WeightCashEqual.model_rebuild()
 WeightCashSpecified.model_rebuild()
